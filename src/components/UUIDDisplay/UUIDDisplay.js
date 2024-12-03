@@ -161,6 +161,10 @@ const FadeOutDown = keyframes`
     opacity: 1;
   }
 
+  40% {
+    opacity: 1;
+  }
+
   100% {
     opacity: 0;
   }
