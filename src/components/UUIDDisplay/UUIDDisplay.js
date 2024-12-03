@@ -254,7 +254,13 @@ function Row({ index, uuid, isFaved, toggleFavedUUID }) {
   const length = indexString.length;
   const padLength = 37;
   const paddingLength = padLength - length;
-  const padding = "0".repeat(paddingLength);
+  let padding;
+  if (paddingLength < 0) {
+    console.error("paddingLength < 0", indexString, length, padLength);
+    padding = "";
+  } else {
+    padding = "0".repeat(paddingLength);
+  }
   const [justFaved, setJustFaved] = React.useState(null);
   const [mouseDown, setMouseDown] = React.useState(false);
   const [justCopied, setJustCopied] = React.useState(false);

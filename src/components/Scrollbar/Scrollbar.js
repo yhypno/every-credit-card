@@ -51,20 +51,39 @@ const NavigationArrow = styled(UnstyledButton)`
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background-color 0.1s ease-in-out;
+  transition:
+    background-color 0.1s ease-in-out,
+    border-color 0.5s ease-in-out;
+
+  --border-color: ${(props) =>
+    props.$noBorder ? "transparent" : "var(--slate-300)"};
+
   border-bottom: ${(props) =>
-    props.$top ? "1px solid var(--slate-300)" : "none"};
+    props.$top ? "2px solid var(--border-color)" : "none"};
+
   border-top: ${(props) =>
-    props.$top ? "none" : "1px solid var(--slate-300)"};
+    props.$top
+      ? "none"
+      : props.$noBorder
+        ? "2px solid transparent"
+        : "2px solid var(--border-color)"};
 
   color: var(--slate-500);
   cursor: pointer;
   @media (hover: hover) {
     &:hover {
       background-color: var(--slate-400);
+      border-color: var(--slate-400);
     }
   }
 `;
+
+function percentOfMax(percentage, max) {
+  percentage = BigInt(Math.floor(Number(percentage) * 1000));
+  return (max * percentage) / 1000n;
+}
+
+const TOP_THRESHOLD = 200000n;
 
 function Scrollbar({
   virtualPosition,
@@ -76,6 +95,11 @@ function Scrollbar({
   const thumbRef = React.useRef(null);
   const trackRef = React.useRef(null);
   const [isDragging, setIsDragging] = React.useState(false);
+  const atTop = virtualPosition < TOP_THRESHOLD;
+  const bottomThreshold = React.useMemo(() => {
+    return MAX_POSITION - TOP_THRESHOLD;
+  }, [MAX_POSITION]);
+  const atBottom = virtualPosition > bottomThreshold;
 
   const scrollPercentage = Number((virtualPosition * 100n) / MAX_POSITION);
   const thumbPosition = Math.min(
@@ -93,10 +117,8 @@ function Scrollbar({
     const trackHeight = rect.height - THUMB_HEIGHT;
     let clickPosition = (e.clientY - rect.top - THUMB_HEIGHT / 2) / trackHeight;
     clickPosition = Math.max(0, Math.min(1, clickPosition));
+    const newPosition = percentOfMax(clickPosition, MAX_POSITION);
 
-    const newPosition = BigInt(
-      Math.floor(Number(MAX_POSITION) * clickPosition)
-    );
     animateToPosition(newPosition);
   };
 
@@ -108,14 +130,8 @@ function Scrollbar({
       const trackHeight = rect.height - THUMB_HEIGHT;
       let percentage = (e.clientY - rect.top - THUMB_HEIGHT / 2) / trackHeight;
       percentage = Math.max(0, Math.min(1, percentage));
-
-      let pos = BigInt(Math.floor(Number(MAX_POSITION) * percentage));
-      if (pos < 0n) {
-        pos = 0n;
-      } else if (pos > MAX_POSITION) {
-        pos = MAX_POSITION;
-      }
-      setVirtualPosition(pos);
+      const newPosition = percentOfMax(percentage, MAX_POSITION);
+      setVirtualPosition(newPosition);
     },
     [isDragging, trackRef, MAX_POSITION, setVirtualPosition]
   );
@@ -146,7 +162,11 @@ function Scrollbar({
 
   return (
     <Wrapper>
-      <NavigationArrow $top onClick={() => animateToPosition(0n)}>
+      <NavigationArrow
+        $top
+        $noBorder={atTop}
+        onClick={() => animateToPosition(0n)}
+      >
         <ChevronUp />
       </NavigationArrow>
       <Track ref={trackRef} onClick={handleTrackClick}>
@@ -156,7 +176,11 @@ function Scrollbar({
           onMouseDown={handleDragStart}
         />
       </Track>
-      <NavigationArrow onClick={() => animateToPosition(MAX_POSITION)}>
+      <NavigationArrow
+        $bottom
+        $noBorder={atBottom}
+        onClick={() => animateToPosition(MAX_POSITION)}
+      >
         <ChevronDown />
       </NavigationArrow>
     </Wrapper>
