@@ -5,11 +5,7 @@ import {
   querySmallScreen,
 } from "../../../lib/constants";
 import { Code, Twitter, Bsky, Help } from "../Icons/Icons";
-const SUBHEADS = [
-  "In case you forgot one",
-  "Handy, sometimes",
-  "Hand-picked just for you",
-];
+const SUBHEADS = ["In case you forgot one", "Hand-picked just for you"];
 
 const Wrapper = styled.header`
   padding: 1rem 1rem 16px 24px;

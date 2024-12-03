@@ -4,6 +4,7 @@ import UnstyledButton from "../UnstyledButton/UnstyledButton";
 import { indexToUUID } from "../../../lib/uuidTools";
 import {
   querySmallScreen,
+  queryVerySmallScreen,
   SCROLLBAR_WIDTH,
   MAX_UUID,
   ITEM_HEIGHT,
@@ -104,7 +105,7 @@ const Wrapper = styled.div`
 
   --text-size: 0.875rem;
 
-  @media ${querySmallScreen} {
+  @media ${queryVerySmallScreen} {
     --text-size: 0.75rem;
   }
 `;
@@ -194,9 +195,9 @@ const FadeOutSide = keyframes`
 const CopiedText = styled.div`
   grid-area: copied;
   font-size: var(--text-size);
-  /* color: var(--slate-500); */
-  color: green;
+  color: var(--green-900);
   animation: ${FadeOutDown} 0.6s ease-in both;
+  user-select: none;
 
   @media ${querySmallScreen} {
     position: absolute;
@@ -267,19 +268,21 @@ function Row({ index, uuid, isFaved, toggleFavedUUID }) {
   }
   const [justFaved, setJustFaved] = React.useState(null);
   const [mouseDown, setMouseDown] = React.useState(false);
-  const [justCopied, setJustCopied] = React.useState(false);
+  const [justCopied, setJustCopied] = React.useState(0);
+  const timeoutRef = React.useRef(null);
 
   const handleCopy = React.useCallback(async () => {
+    clearTimeout(timeoutRef.current);
     await navigator.clipboard
       .writeText(uuid)
       .catch((e) => {
         console.error("error copying to clipboard", e);
-        setJustCopied(false);
+        setJustCopied(0);
       })
       .then(() => {
-        setJustCopied(uuid);
-        setTimeout(() => {
-          setJustCopied(false);
+        setJustCopied((prev) => prev + 1);
+        timeoutRef.current = setTimeout(() => {
+          setJustCopied(0);
         }, 1000);
       });
   }, [uuid]);
@@ -342,7 +345,7 @@ function Row({ index, uuid, isFaved, toggleFavedUUID }) {
           style={{ height: "100%", aspectRatio: 1 }}
         />
       </FavoriteButton>
-      {justCopied && <CopiedText>copied!</CopiedText>}
+      {justCopied !== 0 && <CopiedText key={justCopied}>copied!</CopiedText>}
     </RowWrapper>
   );
 }
