@@ -10,6 +10,7 @@ const Wrapper = styled.div`
   background-color: var(--slate-200);
   display: flex;
   flex-direction: column;
+  -webkit-tap-highlight-color: transparent;
 `;
 
 const Track = styled.div`
@@ -17,6 +18,7 @@ const Track = styled.div`
   margin: 0 0.5rem;
   cursor: pointer;
   position: relative;
+  -webkit-tap-highlight-color: transparent;
 `;
 
 const Thumb = styled.div`
@@ -28,6 +30,7 @@ const Thumb = styled.div`
   height: ${THUMB_HEIGHT}px;
   cursor: grab;
   transition: background-color 0.1s ease-in-out;
+  -webkit-tap-highlight-color: transparent;
 
   @media (hover: hover) {
     &:hover {
@@ -49,6 +52,10 @@ const NavigationArrow = styled(UnstyledButton)`
   align-items: center;
   justify-content: center;
   transition: background-color 0.1s ease-in-out;
+  border-bottom: ${(props) =>
+    props.$top ? "1px solid var(--slate-300)" : "none"};
+  border-top: ${(props) =>
+    props.$top ? "none" : "1px solid var(--slate-300)"};
 
   color: var(--slate-500);
   cursor: pointer;
@@ -139,7 +146,7 @@ function Scrollbar({
 
   return (
     <Wrapper>
-      <NavigationArrow onClick={() => animateToPosition(0n)}>
+      <NavigationArrow $top onClick={() => animateToPosition(0n)}>
         <ChevronUp />
       </NavigationArrow>
       <Track ref={trackRef} onClick={handleTrackClick}>
@@ -149,7 +156,7 @@ function Scrollbar({
           onMouseDown={handleDragStart}
         />
       </Track>
-      <NavigationArrow $bottom onClick={() => animateToPosition(MAX_POSITION)}>
+      <NavigationArrow onClick={() => animateToPosition(MAX_POSITION)}>
         <ChevronDown />
       </NavigationArrow>
     </Wrapper>

@@ -23,6 +23,21 @@ const BaseButton = styled(UnstyledButton)`
   @media ${querySmallScreen} {
     height: 60%;
   }
+
+  &:focus {
+    outline: none;
+    background-color: transparent;
+  }
+
+  &:selected {
+    background-color: transparent;
+  }
+
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -webkit-tap-highlight-color: transparent;
 `;
 
 const CopyButton = styled(BaseButton)`
@@ -159,12 +174,12 @@ const FadeOutSide = keyframes`
 
   30% {
     opacity: 1;
-    transform: translateX(-100%);
+    transform: translateX(-110%);
   }
 
   50% {
     opacity: 1;
-    transform: translateX(-100%);
+    transform: translateX(-110%);
   }
 
   100% {
@@ -228,6 +243,10 @@ const UUID = styled.span`
   color: var(--uuid-color);
   display: block;
   width: fit-content;
+
+  @media ${querySmallScreen} {
+    justify-self: end;
+  }
 `;
 
 function Row({ index, uuid, isFaved, toggleFavedUUID }) {

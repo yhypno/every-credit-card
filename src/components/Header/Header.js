@@ -54,6 +54,13 @@ const Title = styled.h1`
 const Link = styled.a`
   color: inherit;
   display: inline;
+  transition: color 0.1s ease-in-out;
+
+  @media (hover: hover) {
+    &:hover {
+      color: var(--neutral-500);
+    }
+  }
 `;
 
 const SelfPromotion = styled.div`
@@ -73,6 +80,12 @@ const SelfPromotion = styled.div`
 const TitleLink = styled.a`
   text-decoration: none;
   color: inherit;
+
+  @media (hover: hover) {
+    &:hover {
+      text-decoration: underline;
+    }
+  }
 `;
 
 const SocialLink = styled.a`
