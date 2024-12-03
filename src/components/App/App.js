@@ -1,6 +1,14 @@
 import React from "react";
 import styled, { keyframes } from "styled-components";
-import { ChevronUp, ChevronDown, ClipboardCopy, Star } from "../Icons/Icons";
+import {
+  ChevronUp,
+  ChevronDown,
+  ClipboardCopy,
+  Star,
+  Twitter,
+  Bsky,
+  Code,
+} from "../Icons/Icons";
 const MAX_UUID = 2n ** 122n;
 const WIDTH_TO_SHOW_DOUBLE_HEIGHT = 768;
 const SCROLLBAR_WIDTH = 24;
@@ -8,13 +16,12 @@ const SCROLLBAR_WIDTH = 24;
 const SUBHEADS = [
   "In case you forgot one",
   "Handy, sometimes",
-  "Find them all!",
-  "Hand-picked, just for you",
+  "Hand-picked just for you",
 ];
 
 const Wrapper = styled.div`
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   height: 100svh;
   max-height: 100svh;
   height: 100dvh;
@@ -43,10 +50,12 @@ const NavigationArrow = styled(UnstyledButton)`
   /* border-bottom: 1px solid #e5e7eb; */
   transition: background-color 0.1s ease-in-out;
 
-  color: var(--slate-600);
-
-  &:hover {
-    background-color: var(--slate-400);
+  color: var(--slate-500);
+  cursor: pointer;
+  @media (hover: hover) {
+    &:hover {
+      background-color: var(--slate-400);
+    }
   }
 `;
 
@@ -59,7 +68,10 @@ const CopyButton = styled(UnstyledButton)`
   transition: color 0.1s ease-in-out;
   cursor: pointer;
 
-  &:hover {
+  @media (hover: hover) {
+    &:hover {
+      color: var(--slate-900);
+    }
   }
 
   transition: transform 0.1s ease-in-out;
@@ -101,12 +113,11 @@ const FavoriteButton = styled(UnstyledButton)`
     animation: ${SpinStretch} 1s ease-in-out;
   }
 
-  &:hover {
-    color: ${(props) =>
-      props.$isFaved ? "var(--yellow-100)" : "var(--yellow-500)"};
-    /* --fill-color: var(--yellow-400); */
-    /* --fill-color: ${(props) =>
-      props.$isFaved ? "var(--yellow-100)" : "var(--yellow-500)"}; */
+  @media (hover: hover) {
+    &:hover {
+      color: ${(props) =>
+        props.$isFaved ? "var(--yellow-100)" : "var(--yellow-500)"};
+    }
   }
   cursor: pointer;
 `;
@@ -121,12 +132,25 @@ const Header = styled.header`
   align-items: center;
   /* justify-content: center; */
   justify-content: space-between;
+
+  @media (max-width: ${WIDTH_TO_SHOW_DOUBLE_HEIGHT}px) {
+    flex-direction: column;
+    gap: 1.5rem;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    /* align-items: flex-start; */
+    /* justify-content: flex-start; */
+  }
 `;
 
 const TitleSubheader = styled.div`
   display: flex;
   gap: 0.25rem;
   flex-direction: column;
+
+  @media (max-width: ${WIDTH_TO_SHOW_DOUBLE_HEIGHT}px) {
+    align-items: center;
+  }
 `;
 
 const HeaderSubtitle = styled.div`
@@ -141,19 +165,35 @@ const HeaderTitle = styled.h1`
 `;
 
 const Link = styled.a`
-  color: blue;
+  color: inherit;
   display: inline;
 `;
 
 const MeWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-end;
+  gap: 0.5rem;
+
+  @media (max-width: ${WIDTH_TO_SHOW_DOUBLE_HEIGHT}px) {
+    flex-direction: row-reverse;
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+    /* align-items: flex-start; */
+  }
 `;
 
 const HeaderLink = styled.a`
   text-decoration: none;
   color: inherit;
+`;
+
+const HeaderAndContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
 `;
 
 const Content = styled.div`
@@ -175,7 +215,6 @@ const UUIDContainer = styled.div`
 const UUIDList = styled.div`
   height: 100%;
   padding-bottom: 2rem;
-  padding-right: 1rem;
 `;
 
 const UUIDContent = styled.div`
@@ -184,7 +223,7 @@ const UUIDContent = styled.div`
 
   grid-template-areas: "index colon uuid copy favorite";
   grid-template-rows: 100%;
-  grid-template-columns: repeat(5, fit-content(0));
+  grid-template-columns: repeat(5, fit-content(15px));
   gap: 0.25rem 0.5rem;
   align-items: center;
 
@@ -195,8 +234,10 @@ const UUIDContent = styled.div`
   border-bottom: 1px solid var(--border-color);
   height: ${(props) => props.$height}px;
 
-  &:hover {
-    background-color: var(--slate-400);
+  @media (hover: hover) {
+    &:hover {
+      background-color: var(--slate-400);
+    }
   }
 
   @media (max-width: ${WIDTH_TO_SHOW_DOUBLE_HEIGHT}px) {
@@ -207,6 +248,7 @@ const UUIDContent = styled.div`
     justify-content: center;
     gap: 0.25rem 0.5rem;
     padding: 0.5rem 0;
+    margin-left: 0;
   }
 `;
 
@@ -318,12 +360,41 @@ const ScrollbarThumb = styled.div`
   cursor: grab;
   transition: background-color 0.1s ease-in-out;
 
-  &:hover {
-    background-color: var(--slate-500);
+  @media (hover: hover) {
+    &:hover {
+      background-color: var(--slate-500);
+    }
   }
 
   &:active {
     cursor: grabbing;
+  }
+`;
+
+const SocialWrapper = styled.a`
+  display: inline-flex;
+  align-items: center;
+  width: 1.5em;
+  height: 1.5em;
+  color: var(--slate-500);
+
+  transition: color 0.1s ease-in-out;
+  @media (hover: hover) {
+    &:hover {
+      color: var(--slate-700);
+    }
+  }
+`;
+
+const Socials = styled.div`
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  align-items: center;
+
+  @media (max-width: ${WIDTH_TO_SHOW_DOUBLE_HEIGHT}px) {
+    transform: translateY(-1px);
   }
 `;
 
@@ -481,18 +552,16 @@ function App() {
     setIsDragging(false);
   }, [setIsDragging]);
 
-  const movePosition = (delta) => {
-    if (isAnimating) return;
-    setVirtualPosition((prev) => {
-      const newPos = prev + delta;
-      return newPos < 0n ? 0n : newPos > MAX_POSITION ? MAX_POSITION : newPos;
-    });
-  };
-
-  const handleWheel = (e) => {
-    if (isAnimating) return;
-    movePosition(BigInt(Math.floor(e.deltaY)));
-  };
+  const movePosition = React.useCallback(
+    (delta) => {
+      if (isAnimating) return;
+      setVirtualPosition((prev) => {
+        const newPos = prev + delta;
+        return newPos < 0n ? 0n : newPos > MAX_POSITION ? MAX_POSITION : newPos;
+      });
+    },
+    [isAnimating, MAX_POSITION]
+  );
 
   const handleKey = (e) => {
     if (isAnimating) return;
@@ -615,75 +684,158 @@ function App() {
     return SUBHEADS[Math.floor(Math.random() * SUBHEADS.length)];
   }, []);
 
+  React.useEffect(() => {
+    if (!containerRef.current) return;
+    const handleWheel = (e) => {
+      if (isAnimating) return;
+      e.preventDefault();
+      movePosition(BigInt(Math.floor(e.deltaY)));
+    };
+    containerRef.current.addEventListener("wheel", handleWheel, {
+      passive: false,
+    });
+
+    let lastTouchY = 0;
+    let lastTouchTime = 0;
+    let velocity = 0;
+    let animationFrame = null;
+
+    const applyMomentum = () => {
+      if (Math.abs(velocity) > 0.5) {
+        movePosition(BigInt(Math.floor(velocity)));
+        // Decay the velocity - play with these numbers to adjust the "feel"
+        velocity *= 0.95;
+        animationFrame = requestAnimationFrame(applyMomentum);
+      } else {
+        velocity = 0;
+      }
+    };
+
+    const handleTouchStart = (e) => {
+      lastTouchY = e.touches[0].clientY;
+      lastTouchTime = Date.now();
+      velocity = 0;
+      if (animationFrame) {
+        cancelAnimationFrame(animationFrame);
+      }
+    };
+
+    const handleTouchMove = (e) => {
+      e.preventDefault();
+      const touchY = e.touches[0].clientY;
+      const deltaY = lastTouchY - touchY;
+      const now = Date.now();
+      const deltaTime = now - lastTouchTime;
+
+      velocity = (deltaY / deltaTime) * 16.67;
+
+      lastTouchY = touchY;
+      lastTouchTime = now;
+
+      movePosition(BigInt(Math.floor(deltaY * 2)));
+    };
+
+    const handleTouchEnd = () => {
+      // Start momentum scrolling
+      if (Math.abs(velocity) > 0.5) {
+        animationFrame = requestAnimationFrame(applyMomentum);
+      }
+    };
+
+    containerRef.current.addEventListener("touchstart", handleTouchStart, {
+      passive: false,
+    });
+    containerRef.current.addEventListener("touchmove", handleTouchMove, {
+      passive: false,
+    });
+    containerRef.current.addEventListener("touchend", handleTouchEnd, {
+      passive: false,
+    });
+
+    return () => {
+      containerRef.current.removeEventListener("wheel", handleWheel);
+      containerRef.current.removeEventListener("touchstart", handleTouchStart);
+      containerRef.current.removeEventListener("touchmove", handleTouchMove);
+      containerRef.current.removeEventListener("touchend", handleTouchEnd);
+    };
+  }, []);
+
   return (
     <Wrapper>
-      <Header>
-        <HeaderLink href="/">
-          <TitleSubheader>
-            <HeaderTitle>Every UUID</HeaderTitle>
-            <HeaderSubtitle>{subheadText}</HeaderSubtitle>
-          </TitleSubheader>
-        </HeaderLink>
-        <MeWrapper>
-          <p>
-            A website by <Link href="https://eieio.games">eieio</Link>
-          </p>
-        </MeWrapper>
-      </Header>
+      <HeaderAndContent>
+        <Header>
+          <HeaderLink href="/">
+            <TitleSubheader>
+              <HeaderTitle>Every UUID</HeaderTitle>
+              <HeaderSubtitle>{subheadText}</HeaderSubtitle>
+            </TitleSubheader>
+          </HeaderLink>
+          <MeWrapper>
+            <Socials>
+              <SocialWrapper href="https://github.com/nolenroyalty/every-uuid">
+                <Code />
+              </SocialWrapper>
+              <SocialWrapper href="https://twitter.com/itseieio">
+                <Twitter />
+              </SocialWrapper>
+              <SocialWrapper href="https://bsky.app/profile/itseieio.bsky.social">
+                <Bsky />
+              </SocialWrapper>
+            </Socials>
+            <p>
+              A website by <Link href="https://eieio.games">eieio</Link>
+            </p>
+          </MeWrapper>
+        </Header>
 
-      <Content>
-        <UUIDContainer
-          ref={containerRef}
-          onWheel={handleWheel}
-          onKeyDown={handleKey}
-          tabIndex={0}
+        <Content>
+          <UUIDContainer ref={containerRef} onKeyDown={handleKey} tabIndex={0}>
+            <UUIDList>
+              {Array.from({ length: itemsToShow }, (_, i) => {
+                const index = virtualPosition + BigInt(i);
+                if (index > MAX_UUID) {
+                  return null;
+                }
+                const uuid = indexToUUID(index);
+                if (!uuid) {
+                  console.log("no uuid", index);
+                }
+                return (
+                  <UUIDItem
+                    key={i}
+                    height={ITEM_HEIGHT}
+                    index={index}
+                    uuid={uuid}
+                    isFaved={favedUUIDs[uuid]}
+                    toggleFavedUUID={toggleFavedUUID}
+                  />
+                );
+              })}
+            </UUIDList>
+          </UUIDContainer>
+        </Content>
+      </HeaderAndContent>
+      <ScrollbarContainer>
+        <NavigationArrow onClick={() => handleAnchorClick(0n)}>
+          <ChevronUp />
+        </NavigationArrow>
+        <ScrollbarTrack ref={scrollbarRef} onClick={handleScrollbarClick}>
+          <ScrollbarThumb
+            ref={thumbRef}
+            style={{
+              top: `${thumbPosition}%`,
+              height: THUMB_HEIGHT,
+            }}
+            onMouseDown={handleDragStart}
+          />
+        </ScrollbarTrack>
+        <NavigationArrow
+          $bottom
+          onClick={() => handleAnchorClick(MAX_POSITION)}
         >
-          <UUIDList>
-            {Array.from({ length: itemsToShow }, (_, i) => {
-              const index = virtualPosition + BigInt(i);
-              if (index > MAX_UUID) {
-                return null;
-              }
-              const uuid = indexToUUID(index);
-              if (!uuid) {
-                console.log("no uuid", index);
-              }
-              return (
-                <UUIDItem
-                  key={i}
-                  height={ITEM_HEIGHT}
-                  index={index}
-                  uuid={uuid}
-                  isFaved={favedUUIDs[uuid]}
-                  toggleFavedUUID={toggleFavedUUID}
-                />
-              );
-            })}
-          </UUIDList>
-        </UUIDContainer>
-
-        <ScrollbarContainer>
-          <NavigationArrow onClick={() => handleAnchorClick(0n)}>
-            <ChevronUp />
-          </NavigationArrow>
-          <ScrollbarTrack ref={scrollbarRef} onClick={handleScrollbarClick}>
-            <ScrollbarThumb
-              ref={thumbRef}
-              style={{
-                top: `${thumbPosition}%`,
-                height: THUMB_HEIGHT,
-              }}
-              onMouseDown={handleDragStart}
-            />
-          </ScrollbarTrack>
-          <NavigationArrow
-            $bottom
-            onClick={() => handleAnchorClick(MAX_POSITION)}
-          >
-            <ChevronDown />
-          </NavigationArrow>
-        </ScrollbarContainer>
-      </Content>
+          <ChevronDown />
+        </NavigationArrow>
+      </ScrollbarContainer>
     </Wrapper>
   );
 }
