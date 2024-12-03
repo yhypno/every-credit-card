@@ -11,14 +11,24 @@ import {
 } from "../../../lib/constants";
 import { ClipboardCopy, Star } from "../Icons";
 
-const CopyButton = styled(UnstyledButton)`
+const BaseButton = styled(UnstyledButton)`
   height: 100%;
   aspect-ratio: 1;
+  cursor: pointer;
+  padding: 0;
+  transition:
+    transform 0.1s ease-in-out,
+    color 0.1s ease-in-out;
+
+  @media ${querySmallScreen} {
+    height: 60%;
+  }
+`;
+
+const CopyButton = styled(BaseButton)`
   grid-area: copy;
 
   color: var(--slate-700);
-  transition: color 0.1s ease-in-out;
-  cursor: pointer;
 
   @media (hover: hover) {
     &:hover {
@@ -26,7 +36,8 @@ const CopyButton = styled(UnstyledButton)`
     }
   }
 
-  transition: transform 0.1s ease-in-out;
+  transform: ${(props) => (props.$rowMouseDown ? "scale(0.8)" : "none")};
+
   &:active {
     transform: scale(0.8);
   }
@@ -50,13 +61,10 @@ const SpinStretch = keyframes`
   }
 `;
 
-const FavoriteButton = styled(UnstyledButton)`
-  height: 100%;
-  aspect-ratio: 1;
+const FavoriteButton = styled(BaseButton)`
   grid-area: favorite;
 
   color: var(--yellow-700);
-  transition: color 0.1s ease-in-out;
 
   --fill-color: ${(props) =>
     props.$isFaved ? "var(--yellow-500)" : "transparent"};
@@ -71,7 +79,6 @@ const FavoriteButton = styled(UnstyledButton)`
         props.$isFaved ? "var(--yellow-100)" : "var(--yellow-500)"};
     }
   }
-  cursor: pointer;
 `;
 
 const Wrapper = styled.div`
@@ -79,6 +86,12 @@ const Wrapper = styled.div`
   min-height: 0;
   position: relative;
   outline: none;
+
+  --text-size: 0.875rem;
+
+  @media ${querySmallScreen} {
+    --text-size: 0.75rem;
+  }
 `;
 
 const List = styled.div`
@@ -90,7 +103,7 @@ const RowWrapper = styled.div`
   display: grid;
   padding: 0.25rem 0;
 
-  grid-template-areas: "index colon uuid copy favorite";
+  grid-template-areas: "index colon uuid copy favorite copied";
   grid-template-rows: 100%;
   grid-template-columns: repeat(5, fit-content(15px));
   gap: 0.25rem 0.5rem;
@@ -99,7 +112,7 @@ const RowWrapper = styled.div`
   margin-left: ${SCROLLBAR_WIDTH}px;
   font-family: monospace;
   white-space: nowrap;
-  font-size: 0.875rem;
+  font-size: var(--text-size);
   border-bottom: 1px solid var(--border-color);
   height: ${ITEM_HEIGHT}px;
 
@@ -109,15 +122,72 @@ const RowWrapper = styled.div`
     }
   }
 
+  background-color: var(--row-background, transparent);
+  transition: background-color 0.1s ease-in-out;
+
   @media ${querySmallScreen} {
     grid-template-columns: repeat(2, fit-content(0));
-    grid-template-areas: "index copy" "uuid favorite";
+    grid-template-areas: "index copy favorite" "uuid copy favorite";
     grid-template-rows: 50% 50%;
     height: ${ITEM_HEIGHT * 2}px;
     justify-content: center;
     gap: 0.25rem 0.5rem;
     padding: 0.5rem 0;
     margin-left: 0;
+  }
+`;
+
+const FadeOutDown = keyframes`
+  0% {
+    opacity: 0;
+  }
+
+  15% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+  }
+`;
+
+const FadeOutSide = keyframes`
+  0% {
+    opacity: 0;
+    transform: translateX(0);
+  }
+
+  30% {
+    opacity: 1;
+    transform: translateX(-100%);
+  }
+
+  50% {
+    opacity: 1;
+    transform: translateX(-100%);
+  }
+
+  100% {
+    transform: translateX(0);
+  }
+`;
+
+const CopiedText = styled.div`
+  grid-area: copied;
+  font-size: var(--text-size);
+  /* color: var(--slate-500); */
+  color: green;
+  animation: ${FadeOutDown} 0.6s ease-in both;
+
+  @media ${querySmallScreen} {
+    position: absolute;
+    backdrop-filter: blur(10px);
+    background-color: var(--slate-100);
+    border-radius: 0.5rem;
+    padding: 0.5rem;
+    left: 100%;
+    animation: ${FadeOutSide} 1s ease-out both;
+    /* transform: translateX(-50%); */
   }
 `;
 
@@ -167,21 +237,65 @@ function Row({ index, uuid, isFaved, toggleFavedUUID }) {
   const paddingLength = padLength - length;
   const padding = "0".repeat(paddingLength);
   const [justFaved, setJustFaved] = React.useState(null);
+  const [mouseDown, setMouseDown] = React.useState(false);
+  const [justCopied, setJustCopied] = React.useState(false);
+
+  const handleCopy = React.useCallback(async () => {
+    await navigator.clipboard
+      .writeText(uuid)
+      .catch((e) => {
+        console.error("error copying to clipboard", e);
+        setJustCopied(false);
+      })
+      .then(() => {
+        setJustCopied(uuid);
+        setTimeout(() => {
+          setJustCopied(false);
+        }, 1000);
+      });
+  }, [uuid]);
+
   React.useEffect(() => {
     if (justFaved && justFaved !== uuid) {
       setJustFaved(null);
     }
   }, [justFaved, uuid]);
 
+  React.useEffect(() => {
+    const handleMouseUp = () => {
+      if (mouseDown) {
+        setMouseDown(false);
+        handleCopy();
+      }
+    };
+
+    window.addEventListener("mouseup", handleMouseUp);
+    return () => {
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [mouseDown, handleCopy]);
+
   return (
-    <RowWrapper>
+    <RowWrapper
+      // this doesn't work well with touch-scrolling (you end up copying on accident)
+      // so we just use the mouse
+      onMouseDown={(e) => {
+        // only trigger if the click is on the row, not on some text
+        if (e.target === e.currentTarget) {
+          setMouseDown(true);
+        }
+      }}
+      style={{
+        backgroundColor: mouseDown ? "var(--slate-500)" : null,
+      }}
+    >
       <IndexWithPadding style={{ gridArea: "index" }}>
         <Padding>{padding}</Padding>
         <Index>{indexString}</Index>
       </IndexWithPadding>
       <Colon />
       <UUID>{uuid}</UUID>
-      <CopyButton onClick={() => navigator.clipboard.writeText(uuid)}>
+      <CopyButton onClick={handleCopy} $rowMouseDown={mouseDown}>
         <ClipboardCopy style={{ height: "100%", aspectRatio: 1 }} />
       </CopyButton>
       <FavoriteButton
@@ -199,6 +313,7 @@ function Row({ index, uuid, isFaved, toggleFavedUUID }) {
           style={{ height: "100%", aspectRatio: 1 }}
         />
       </FavoriteButton>
+      {justCopied && <CopiedText>copied!</CopiedText>}
     </RowWrapper>
   );
 }

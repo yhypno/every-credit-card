@@ -4,7 +4,7 @@ import {
   WIDTH_TO_SHOW_DOUBLE_HEIGHT,
   querySmallScreen,
 } from "../../../lib/constants";
-import { Code, Twitter, Bsky } from "../Icons/Icons";
+import { Code, Twitter, Bsky, Help } from "../Icons/Icons";
 const SUBHEADS = [
   "In case you forgot one",
   "Handy, sometimes",
@@ -20,6 +20,7 @@ const Wrapper = styled.header`
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
+  position: relative;
 
   @media ${querySmallScreen} {
     flex-direction: column;
@@ -66,7 +67,6 @@ const SelfPromotion = styled.div`
     width: 100%;
     justify-content: space-between;
     align-items: center;
-    /* align-items: flex-start; */
   }
 `;
 
@@ -117,6 +117,9 @@ function Header() {
       </TitleSubhead>
       <SelfPromotion>
         <Socials>
+          <SocialLink href="https://eieio.games/blog/writing-down-every-uuid">
+            <Help />
+          </SocialLink>
           <SocialLink href="https://github.com/nolenroyalty/every-uuid">
             <Code />
           </SocialLink>
