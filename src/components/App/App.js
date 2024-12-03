@@ -766,7 +766,7 @@ function App() {
         <Header>
           <HeaderLink href="/">
             <TitleSubheader>
-              <HeaderTitle>Every UUID</HeaderTitle>
+              <HeaderTitle>Every UUID Dot Com</HeaderTitle>
               <HeaderSubtitle>{subheadText}</HeaderSubtitle>
             </TitleSubheader>
           </HeaderLink>
