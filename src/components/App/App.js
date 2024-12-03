@@ -1,5 +1,16 @@
 import React from "react";
-import styled from "styled-components";
+import styled, { keyframes } from "styled-components";
+import { ChevronUp, ChevronDown, ClipboardCopy, Star } from "../Icons/Icons";
+const MAX_UUID = 2n ** 122n;
+const WIDTH_TO_SHOW_DOUBLE_HEIGHT = 768;
+const SCROLLBAR_WIDTH = 24;
+
+const SUBHEADS = [
+  "In case you forgot one",
+  "Handy, sometimes",
+  "Find them all!",
+  "Hand-picked, just for you",
+];
 
 const Wrapper = styled.div`
   display: flex;
@@ -12,34 +23,137 @@ const Wrapper = styled.div`
   overscroll-behavior: none;
 `;
 
-const NavigationArrow = styled.button`
-  width: 100%;
+const UnstyledButton = styled.button`
+  border: none;
+  background: none;
+  padding: 0;
+  align-items: center;
+  justify-content: center;
+`;
+
+const NavigationArrow = styled(UnstyledButton)`
+  /* width: 100%; */
+  width: ${SCROLLBAR_WIDTH}px;
+  margin: 0 0 0 auto;
   height: 1.5rem;
-  background-color: rgb(243 244 246);
+  background-color: var(--slate-200);
   display: flex;
   align-items: center;
   justify-content: center;
-  border: none;
-  border-bottom: 1px solid #e5e7eb;
+  /* border-bottom: 1px solid #e5e7eb; */
+  transition: background-color 0.1s ease-in-out;
+
+  color: var(--slate-600);
 
   &:hover {
-    background-color: rgb(229 231 235);
+    background-color: var(--slate-400);
+  }
+`;
+
+const CopyButton = styled(UnstyledButton)`
+  height: 100%;
+  aspect-ratio: 1;
+  grid-area: copy;
+
+  color: var(--slate-700);
+  transition: color 0.1s ease-in-out;
+  cursor: pointer;
+
+  &:hover {
   }
 
-  ${(props) =>
-    props.$bottom &&
-    `
-    border-bottom: none;
-    border-top: 1px solid #e5e7eb;
-  `}
+  transition: transform 0.1s ease-in-out;
+  &:active {
+    transform: scale(0.8);
+  }
+`;
+
+const SpinStretch = keyframes`
+  0% {
+    transform: scale(1) rotate(0deg);
+  }
+
+  20% {
+    transform: scale(0.8) rotate(-40deg);
+  }
+
+  80% {
+    transform: scale(1) rotate(400deg);
+  }
+
+  100% {
+    transform: scale(1) rotate(360deg);
+  }
+`;
+
+const FavoriteButton = styled(UnstyledButton)`
+  height: 100%;
+  aspect-ratio: 1;
+  grid-area: favorite;
+
+  color: var(--yellow-700);
+  transition: color 0.1s ease-in-out;
+
+  --fill-color: ${(props) =>
+    props.$isFaved ? "var(--yellow-500)" : "transparent"};
+
+  &[data-just-faved="true"] {
+    animation: ${SpinStretch} 1s ease-in-out;
+  }
+
+  &:hover {
+    color: ${(props) =>
+      props.$isFaved ? "var(--yellow-100)" : "var(--yellow-500)"};
+    /* --fill-color: var(--yellow-400); */
+    /* --fill-color: ${(props) =>
+      props.$isFaved ? "var(--yellow-100)" : "var(--yellow-500)"}; */
+  }
+  cursor: pointer;
 `;
 
 const Header = styled.header`
-  padding: 1rem;
-  border-bottom: 1px solid #e0e0e0;
-  /* position: sticky; */
-  /* top: 0; */
-  /* background-color: #fff; */
+  padding: 1rem 1rem 16px 24px;
+  line-height: 1;
+  border-bottom: 1px solid var(--border-color);
+  font-family: monospace;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  /* justify-content: center; */
+  justify-content: space-between;
+`;
+
+const TitleSubheader = styled.div`
+  display: flex;
+  gap: 0.25rem;
+  flex-direction: column;
+`;
+
+const HeaderSubtitle = styled.div`
+  font-size: 0.875rem;
+  opacity: 0.7;
+  transform: translateX(1px);
+`;
+
+const HeaderTitle = styled.h1`
+  font-size: 1.5rem;
+  margin: 0;
+`;
+
+const Link = styled.a`
+  color: blue;
+  display: inline;
+`;
+
+const MeWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
+const HeaderLink = styled.a`
+  text-decoration: none;
+  color: inherit;
 `;
 
 const Content = styled.div`
@@ -48,7 +162,6 @@ const Content = styled.div`
   flex-direction: row;
   flex: 1;
   min-height: 0;
-  /* background-color: green; */
   overscroll-behavior: none;
 `;
 
@@ -65,27 +178,133 @@ const UUIDList = styled.div`
   padding-right: 1rem;
 `;
 
-const UUIDItem = styled.div`
-  padding: 0.25rem 1rem;
+const UUIDContent = styled.div`
+  display: grid;
+  padding: 0.25rem 0;
+
+  grid-template-areas: "index colon uuid copy favorite";
+  grid-template-rows: 100%;
+  grid-template-columns: repeat(5, fit-content(0));
+  gap: 0.25rem 0.5rem;
+  align-items: center;
+
+  margin-left: ${SCROLLBAR_WIDTH}px;
   font-family: monospace;
-  font-size: 0.875rem;
-  border-bottom: 1px solid #e5e7eb;
   white-space: nowrap;
+  font-size: 0.875rem;
+  border-bottom: 1px solid var(--border-color);
   height: ${(props) => props.$height}px;
 
   &:hover {
-    background-color: rgb(249 250 251);
+    background-color: var(--slate-400);
+  }
+
+  @media (max-width: ${WIDTH_TO_SHOW_DOUBLE_HEIGHT}px) {
+    grid-template-columns: repeat(2, fit-content(0));
+    grid-template-areas: "index copy" "uuid favorite";
+    grid-template-rows: 50% 50%;
+    height: ${(props) => props.$height * 2}px;
+    justify-content: center;
+    gap: 0.25rem 0.5rem;
+    padding: 0.5rem 0;
   }
 `;
 
+const UUIDIndex = styled.span`
+  /* color: var(--neutral-700); */
+  /* color: var(--slate-700); */
+  opacity: 0.7;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+`;
+
+const UUIDPadding = styled.span`
+  /* color: var(--neutral-700); */
+  opacity: 0.3;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+`;
+
+const IndexElt = styled.div`
+  display: inline-block;
+`;
+
+const Colon = styled.span`
+  grid-area: colon;
+
+  &::after {
+    content: "";
+  }
+
+  @media (max-width: ${WIDTH_TO_SHOW_DOUBLE_HEIGHT}px) {
+    display: none;
+  }
+`;
+
+const UUID = styled.span`
+  grid-area: uuid;
+  color: var(--uuid-color);
+  display: block;
+  width: fit-content;
+`;
+
+function UUIDItem({ height, index, uuid, isFaved, toggleFavedUUID }) {
+  const indexString = index.toString();
+  const length = indexString.length;
+  const padLength = 37;
+  const paddingLength = padLength - length;
+  const padding = "0".repeat(paddingLength);
+  const [justFaved, setJustFaved] = React.useState(null);
+  React.useEffect(() => {
+    if (justFaved && justFaved !== uuid) {
+      setJustFaved(null);
+    }
+  }, [justFaved, uuid]);
+
+  return (
+    <UUIDContent $height={height}>
+      <IndexElt style={{ gridArea: "index" }}>
+        <UUIDPadding>{padding}</UUIDPadding>
+        <UUIDIndex>{indexString}</UUIDIndex>
+      </IndexElt>
+      <Colon />
+      <UUID>{uuid}</UUID>
+      <CopyButton onClick={() => navigator.clipboard.writeText(uuid)}>
+        <ClipboardCopy style={{ height: "100%", aspectRatio: 1 }} />
+      </CopyButton>
+      <FavoriteButton
+        $isFaved={isFaved}
+        data-just-faved={isFaved && justFaved === uuid}
+        onClick={() => {
+          if (!isFaved) {
+            setJustFaved(uuid);
+          }
+          toggleFavedUUID(uuid);
+        }}
+      >
+        <Star
+          fill="var(--fill-color)"
+          style={{ height: "100%", aspectRatio: 1 }}
+        />
+      </FavoriteButton>
+    </UUIDContent>
+  );
+}
+
 const ScrollbarContainer = styled.div`
-  width: 1.5rem;
+  width: ${SCROLLBAR_WIDTH}px;
+  background-color: var(--slate-200);
+  display: flex;
+  flex-direction: column;
 `;
 
 const ScrollbarTrack = styled.div`
   height: 100%;
   margin: 0 0.5rem;
-  background-color: rgb(229 231 235);
   cursor: pointer;
   position: relative;
 `;
@@ -95,12 +314,12 @@ const ScrollbarThumb = styled.div`
   left: 0;
   right: 0;
   height: ${(props) => props.$height}px;
-  background-color: rgb(156 163 175);
+  background-color: var(--slate-400);
   cursor: grab;
-  transform: translateY(-50%);
+  transition: background-color 0.1s ease-in-out;
 
   &:hover {
-    background-color: rgb(107 114 128);
+    background-color: var(--slate-500);
   }
 
   &:active {
@@ -108,44 +327,121 @@ const ScrollbarThumb = styled.div`
   }
 `;
 
+function indexToUUID(index) {
+  // Convert index to two 64-bit blocks (left and right)
+  let left = BigInt(index) >> BigInt(64);
+  let right = BigInt(index) & ((BigInt(1) << BigInt(64)) - BigInt(1));
+
+  // Do 8 rounds of mixing
+  for (let round = 0; round < 4; round++) {
+    // In each round we:
+    // 1. Mix the right block using a round function
+    // 2. XOR that with the left block
+    // 3. Swap left and right
+    const mixed = feistelRound(right, round);
+    const newRight = left ^ mixed;
+    left = right;
+    right = newRight;
+  }
+
+  // Combine the blocks and convert to UUID format
+  const result = (left << BigInt(64)) | right;
+  let hex = result.toString(16).padStart(32, "0");
+
+  hex = hex.slice(0, 12) + "4" + hex.slice(13);
+  hex =
+    hex.slice(0, 16) +
+    ((parseInt(hex[16], 16) & 0x3) | 0x8).toString(16) +
+    hex.slice(17);
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+}
+
+function feistelRound(block, round) {
+  // This is our round function that mixes bits
+  // Using different constants for each round
+  const ROUND_CONSTANTS = [
+    BigInt("0x47f5417d6b82b5d1"),
+    // BigInt("0x90a7c5fe8c345af2"),
+    // BigInt("0xd8796c3b2a1e4f8d"),
+    // BigInt("0x6f4a3c8e7d5b9102"),
+    // BigInt("0xb3f8c7d6e5a49201"),
+    BigInt("0x2d9e8b7c6f5a3d4e"),
+    BigInt("0xa1b2c3d4e5f6789a"),
+    BigInt("0x123456789abcdef0"),
+  ];
+
+  // Mix using rotations, XORs, and addition
+  let mixed = block;
+  mixed ^= ROUND_CONSTANTS[round];
+  mixed =
+    ((mixed << BigInt(7)) | (mixed >> BigInt(57))) &
+    ((BigInt(1) << BigInt(64)) - BigInt(1));
+  mixed = mixed * BigInt("0x6c8e944d1f5aa3b7");
+  mixed =
+    ((mixed << BigInt(13)) | (mixed >> BigInt(51))) &
+    ((BigInt(1) << BigInt(64)) - BigInt(1));
+
+  return mixed;
+}
+
 function App() {
   const [virtualPosition, setVirtualPosition] = React.useState(0n);
   const [isAnimating, setIsAnimating] = React.useState(false);
   const [targetPosition, setTargetPosition] = React.useState(null);
   const [isDragging, setIsDragging] = React.useState(false);
+  const [itemsToShow, setItemsToShow] = React.useState(40);
   const containerRef = React.useRef(null);
   const scrollbarRef = React.useRef(null);
   const thumbRef = React.useRef(null);
   const animationRef = React.useRef(null);
-  const ITEMS_TO_SHOW = 100;
+  // const itemsToShow = 200;
   const ITEM_HEIGHT = 24;
   const THUMB_HEIGHT = 20;
+  const [favedUUIDs, setFavedUUIDs] = React.useState(
+    localStorage.getItem("favedUUIDs")
+      ? JSON.parse(localStorage.getItem("favedUUIDs"))
+      : {}
+  );
 
-  // Maximum position is (2^128 - ITEMS_TO_SHOW) to ensure we don't generate past the last UUID
-  const MAX_POSITION = 2n ** 128n - BigInt(ITEMS_TO_SHOW);
-
-  const generateUUID = (index) => {
-    // Return null if we're past the maximum UUID
-    if (index >= 2n ** 128n) return null;
-
-    let uuid = "";
-    for (let i = 0; i < 32; i++) {
-      if (i === 8 || i === 12 || i === 16 || i === 20) {
-        uuid += "-";
-      }
-      const hash = ((Number(index % 100000000n) + i) * 16807) % 16;
-      const hex = hash.toString(16);
-
-      if (i === 12) {
-        uuid += "4";
-      } else if (i === 16) {
-        uuid += "8";
+  const toggleFavedUUID = (uuid) => {
+    setFavedUUIDs((prev) => {
+      const prevValue = prev[uuid] || false;
+      const newValue = !prevValue;
+      const newFavedUUIDs = { ...prev };
+      if (newValue) {
+        newFavedUUIDs[uuid] = true;
       } else {
-        uuid += hex;
+        delete newFavedUUIDs[uuid];
       }
-    }
-    return uuid;
+
+      localStorage.setItem("favedUUIDs", JSON.stringify(newFavedUUIDs));
+      return newFavedUUIDs;
+    });
   };
+
+  React.useEffect(() => {
+    if (containerRef.current === null) return;
+
+    const computeItemsToShow = () => {
+      const rect = containerRef.current.getBoundingClientRect();
+      const height = rect.height;
+      const width = rect.width + SCROLLBAR_WIDTH;
+      const showDoubleHeight = width < WIDTH_TO_SHOW_DOUBLE_HEIGHT;
+      const items = Math.floor(
+        height / (showDoubleHeight ? ITEM_HEIGHT * 2 : ITEM_HEIGHT)
+      );
+      setItemsToShow(items);
+    };
+    computeItemsToShow();
+
+    // debounce??
+    window.addEventListener("resize", computeItemsToShow);
+    return () => {
+      window.removeEventListener("resize", computeItemsToShow);
+    };
+  }, []);
+
+  const MAX_POSITION = MAX_UUID - BigInt(itemsToShow);
 
   const animateToPosition = (targetPos) => {
     setTargetPosition(targetPos);
@@ -170,7 +466,13 @@ function App() {
       let percentage = (e.clientY - rect.top - THUMB_HEIGHT / 2) / trackHeight;
       percentage = Math.max(0, Math.min(1, percentage));
 
-      setVirtualPosition(BigInt(Math.floor(Number(MAX_POSITION) * percentage)));
+      let pos = BigInt(Math.floor(Number(MAX_POSITION) * percentage));
+      if (pos < 0n) {
+        pos = 0n;
+      } else if (pos > MAX_POSITION) {
+        pos = MAX_POSITION;
+      }
+      setVirtualPosition(pos);
     },
     [isDragging, scrollbarRef, MAX_POSITION]
   );
@@ -188,14 +490,13 @@ function App() {
   };
 
   const handleWheel = (e) => {
-    e.preventDefault();
     if (isAnimating) return;
     movePosition(BigInt(Math.floor(e.deltaY)));
   };
 
   const handleKey = (e) => {
     if (isAnimating) return;
-    const PAGE_SIZE = BigInt(ITEMS_TO_SHOW * ITEM_HEIGHT);
+    const PAGE_SIZE = BigInt(itemsToShow * ITEM_HEIGHT);
 
     switch (e.key) {
       case "ArrowDown":
@@ -293,6 +594,8 @@ function App() {
         }
       };
     }
+    // we intentionally want to save off an "old" copy of virtual position
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAnimating, targetPosition]);
 
   React.useEffect(() => {
@@ -308,14 +611,25 @@ function App() {
     Math.max(0, scrollPercentage)
   );
 
+  const subheadText = React.useMemo(() => {
+    return SUBHEADS[Math.floor(Math.random() * SUBHEADS.length)];
+  }, []);
+
   return (
     <Wrapper>
       <Header>
-        <h1>Every Possible UUID</h1>
-        <p>Position: {virtualPosition.toString()}</p>
+        <HeaderLink href="/">
+          <TitleSubheader>
+            <HeaderTitle>Every UUID</HeaderTitle>
+            <HeaderSubtitle>{subheadText}</HeaderSubtitle>
+          </TitleSubheader>
+        </HeaderLink>
+        <MeWrapper>
+          <p>
+            A website by <Link href="https://eieio.games">eieio</Link>
+          </p>
+        </MeWrapper>
       </Header>
-
-      <NavigationArrow onClick={() => handleAnchorClick(0n)}>^</NavigationArrow>
 
       <Content>
         <UUIDContainer
@@ -325,37 +639,51 @@ function App() {
           tabIndex={0}
         >
           <UUIDList>
-            {Array.from({ length: ITEMS_TO_SHOW }, (_, i) => {
+            {Array.from({ length: itemsToShow }, (_, i) => {
               const index = virtualPosition + BigInt(i);
-              const uuid = generateUUID(index);
-              if (!uuid) return null;
+              if (index > MAX_UUID) {
+                return null;
+              }
+              const uuid = indexToUUID(index);
+              if (!uuid) {
+                console.log("no uuid", index);
+              }
               return (
-                <UUIDItem key={i} style={{ height: ITEM_HEIGHT }}>
-                  {index.toString()}: {uuid}
-                </UUIDItem>
+                <UUIDItem
+                  key={i}
+                  height={ITEM_HEIGHT}
+                  index={index}
+                  uuid={uuid}
+                  isFaved={favedUUIDs[uuid]}
+                  toggleFavedUUID={toggleFavedUUID}
+                />
               );
             })}
           </UUIDList>
         </UUIDContainer>
 
         <ScrollbarContainer>
+          <NavigationArrow onClick={() => handleAnchorClick(0n)}>
+            <ChevronUp />
+          </NavigationArrow>
           <ScrollbarTrack ref={scrollbarRef} onClick={handleScrollbarClick}>
             <ScrollbarThumb
               ref={thumbRef}
               style={{
                 top: `${thumbPosition}%`,
                 height: THUMB_HEIGHT,
-                transform: "translateY(-50%)",
               }}
               onMouseDown={handleDragStart}
             />
           </ScrollbarTrack>
+          <NavigationArrow
+            $bottom
+            onClick={() => handleAnchorClick(MAX_POSITION)}
+          >
+            <ChevronDown />
+          </NavigationArrow>
         </ScrollbarContainer>
       </Content>
-
-      <NavigationArrow $bottom onClick={() => handleAnchorClick(MAX_POSITION)}>
-        ↓
-      </NavigationArrow>
     </Wrapper>
   );
 }
