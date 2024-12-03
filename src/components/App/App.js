@@ -9,15 +9,13 @@ import {
   Bsky,
   Code,
 } from "../Icons/Icons";
-const MAX_UUID = 2n ** 122n;
-const WIDTH_TO_SHOW_DOUBLE_HEIGHT = 768;
-const SCROLLBAR_WIDTH = 24;
-
-const SUBHEADS = [
-  "In case you forgot one",
-  "Handy, sometimes",
-  "Hand-picked just for you",
-];
+import Header from "../Header/Header";
+import {
+  MAX_UUID,
+  WIDTH_TO_SHOW_DOUBLE_HEIGHT,
+  SCROLLBAR_WIDTH,
+  querySmallScreen,
+} from "../../../lib/constants";
 
 const Wrapper = styled.div`
   display: flex;
@@ -122,73 +120,6 @@ const FavoriteButton = styled(UnstyledButton)`
   cursor: pointer;
 `;
 
-const Header = styled.header`
-  padding: 1rem 1rem 16px 24px;
-  line-height: 1;
-  border-bottom: 1px solid var(--border-color);
-  font-family: monospace;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  /* justify-content: center; */
-  justify-content: space-between;
-
-  @media (max-width: ${WIDTH_TO_SHOW_DOUBLE_HEIGHT}px) {
-    flex-direction: column;
-    gap: 1.5rem;
-    padding-left: 0.5rem;
-    padding-right: 0.5rem;
-    /* align-items: flex-start; */
-    /* justify-content: flex-start; */
-  }
-`;
-
-const TitleSubheader = styled.div`
-  display: flex;
-  gap: 0.25rem;
-  flex-direction: column;
-
-  @media (max-width: ${WIDTH_TO_SHOW_DOUBLE_HEIGHT}px) {
-    align-items: center;
-  }
-`;
-
-const HeaderSubtitle = styled.div`
-  font-size: 0.875rem;
-  opacity: 0.7;
-  transform: translateX(1px);
-`;
-
-const HeaderTitle = styled.h1`
-  font-size: 1.5rem;
-  margin: 0;
-`;
-
-const Link = styled.a`
-  color: inherit;
-  display: inline;
-`;
-
-const MeWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 0.5rem;
-
-  @media (max-width: ${WIDTH_TO_SHOW_DOUBLE_HEIGHT}px) {
-    flex-direction: row-reverse;
-    width: 100%;
-    justify-content: space-between;
-    align-items: center;
-    /* align-items: flex-start; */
-  }
-`;
-
-const HeaderLink = styled.a`
-  text-decoration: none;
-  color: inherit;
-`;
-
 const HeaderAndContent = styled.div`
   display: flex;
   flex-direction: column;
@@ -240,7 +171,7 @@ const UUIDContent = styled.div`
     }
   }
 
-  @media (max-width: ${WIDTH_TO_SHOW_DOUBLE_HEIGHT}px) {
+  @media ${querySmallScreen} {
     grid-template-columns: repeat(2, fit-content(0));
     grid-template-areas: "index copy" "uuid favorite";
     grid-template-rows: 50% 50%;
@@ -253,8 +184,6 @@ const UUIDContent = styled.div`
 `;
 
 const UUIDIndex = styled.span`
-  /* color: var(--neutral-700); */
-  /* color: var(--slate-700); */
   opacity: 0.7;
   user-select: none;
   -webkit-user-select: none;
@@ -263,7 +192,6 @@ const UUIDIndex = styled.span`
 `;
 
 const UUIDPadding = styled.span`
-  /* color: var(--neutral-700); */
   opacity: 0.3;
   user-select: none;
   -webkit-user-select: none;
@@ -282,7 +210,7 @@ const Colon = styled.span`
     content: "";
   }
 
-  @media (max-width: ${WIDTH_TO_SHOW_DOUBLE_HEIGHT}px) {
+  @media ${querySmallScreen} {
     display: none;
   }
 `;
@@ -371,33 +299,6 @@ const ScrollbarThumb = styled.div`
   }
 `;
 
-const SocialWrapper = styled.a`
-  display: inline-flex;
-  align-items: center;
-  width: 1.5em;
-  height: 1.5em;
-  color: var(--slate-500);
-
-  transition: color 0.1s ease-in-out;
-  @media (hover: hover) {
-    &:hover {
-      color: var(--slate-700);
-    }
-  }
-`;
-
-const Socials = styled.div`
-  display: flex;
-  flex-direction: row;
-  gap: 0.5rem;
-  justify-content: flex-end;
-  align-items: center;
-
-  @media (max-width: ${WIDTH_TO_SHOW_DOUBLE_HEIGHT}px) {
-    transform: translateY(-1px);
-  }
-`;
-
 function indexToUUID(index) {
   // Convert index to two 64-bit blocks (left and right)
   let left = BigInt(index) >> BigInt(64);
@@ -465,7 +366,6 @@ function App() {
   const scrollbarRef = React.useRef(null);
   const thumbRef = React.useRef(null);
   const animationRef = React.useRef(null);
-  // const itemsToShow = 200;
   const ITEM_HEIGHT = 24;
   const THUMB_HEIGHT = 20;
   const [favedUUIDs, setFavedUUIDs] = React.useState(
@@ -473,6 +373,7 @@ function App() {
       ? JSON.parse(localStorage.getItem("favedUUIDs"))
       : {}
   );
+  const MAX_POSITION = MAX_UUID - BigInt(itemsToShow);
 
   const toggleFavedUUID = (uuid) => {
     setFavedUUIDs((prev) => {
@@ -511,8 +412,6 @@ function App() {
       window.removeEventListener("resize", computeItemsToShow);
     };
   }, []);
-
-  const MAX_POSITION = MAX_UUID - BigInt(itemsToShow);
 
   const animateToPosition = (targetPos) => {
     setTargetPosition(targetPos);
@@ -563,39 +462,97 @@ function App() {
     [isAnimating, MAX_POSITION]
   );
 
-  const handleKey = (e) => {
-    if (isAnimating) return;
-    const PAGE_SIZE = BigInt(itemsToShow * ITEM_HEIGHT);
+  const handleKey = React.useCallback(
+    (e) => {
+      if (isAnimating) return;
+      const PAGE_SIZE = BigInt(itemsToShow);
+      const isMac = navigator.platform.toUpperCase().indexOf("MAC") >= 0;
+      const cmdKey = isMac ? e.metaKey : e.ctrlKey;
+      const shiftKey = e.shiftKey;
 
-    switch (e.key) {
-      case "ArrowDown":
+      const handleAndPrevent = (action) => {
         e.preventDefault();
-        movePosition(1n);
-        break;
-      case "ArrowUp":
-        e.preventDefault();
-        movePosition(-1n);
-        break;
-      case "PageDown":
-        e.preventDefault();
-        movePosition(PAGE_SIZE);
-        break;
-      case "PageUp":
-        e.preventDefault();
-        movePosition(-PAGE_SIZE);
-        break;
-      case "Home":
-        e.preventDefault();
-        animateToPosition(0n);
-        break;
-      case "End":
-        e.preventDefault();
-        animateToPosition(MAX_POSITION);
-        break;
-      default:
-        break;
-    }
-  };
+        action();
+      };
+
+      const hasKeyAndModifier = (key, modifiers = []) => {
+        return e.key === key && modifiers.every((mod) => mod);
+      };
+
+      const handleKeyAndPrevent = (key, modifiers = [], action) => {
+        if (hasKeyAndModifier(key, modifiers)) {
+          handleAndPrevent(action);
+          return true;
+        }
+        return false;
+      };
+
+      const animateWithDelta = (delta) => {
+        let target = virtualPosition + delta;
+        if (target < 0n) {
+          target = 0n;
+        } else if (target > MAX_POSITION) {
+          target = MAX_POSITION;
+        }
+        animateToPosition(target);
+      };
+
+      switch (true) {
+        case handleKeyAndPrevent("ArrowDown", [cmdKey], () => {
+          animateWithDelta(MAX_POSITION);
+        }):
+          return;
+        case handleKeyAndPrevent("ArrowUp", [cmdKey], () =>
+          animateWithDelta(-MAX_POSITION)
+        ):
+          return;
+        case handleKeyAndPrevent(" ", [shiftKey], () => {
+          animateWithDelta(-PAGE_SIZE);
+        }):
+          return;
+        case handleKeyAndPrevent(" ", [], () => {
+          animateWithDelta(PAGE_SIZE);
+        }):
+          return;
+        case handleKeyAndPrevent("PageDown", [cmdKey], () => {
+          animateWithDelta(MAX_POSITION);
+        }):
+          return;
+        case handleKeyAndPrevent("PageUp", [cmdKey], () => {
+          animateWithDelta(0n);
+        }):
+          return;
+        case handleKeyAndPrevent("PageDown", [], () => {
+          animateWithDelta(PAGE_SIZE);
+        }):
+          return;
+        case handleKeyAndPrevent("PageUp", [], () => {
+          animateWithDelta(-PAGE_SIZE);
+        }):
+          return;
+        case handleKeyAndPrevent("Home", [], () => animateWithDelta(0n)):
+          return;
+        case handleKeyAndPrevent("End", [], () =>
+          animateWithDelta(MAX_POSITION)
+        ):
+          return;
+        case handleKeyAndPrevent("ArrowDown", [], () => movePosition(1n)):
+          return;
+        case handleKeyAndPrevent("ArrowUp", [], () => movePosition(-1n)):
+          return;
+        default:
+          break;
+      }
+    },
+    [
+      isAnimating,
+      virtualPosition,
+      movePosition,
+      MAX_POSITION,
+      itemsToShow,
+      animateToPosition,
+    ]
+  );
 
   const handleScrollbarClick = (e) => {
     // Prevent click handling if we're clicking the thumb itself
@@ -680,10 +637,6 @@ function App() {
     Math.max(0, scrollPercentage)
   );
 
-  const subheadText = React.useMemo(() => {
-    return SUBHEADS[Math.floor(Math.random() * SUBHEADS.length)];
-  }, []);
-
   React.useEffect(() => {
     if (!containerRef.current) return;
     const handleWheel = (e) => {
@@ -763,31 +716,7 @@ function App() {
   return (
     <Wrapper>
       <HeaderAndContent>
-        <Header>
-          <HeaderLink href="/">
-            <TitleSubheader>
-              <HeaderTitle>Every UUID Dot Com</HeaderTitle>
-              <HeaderSubtitle>{subheadText}</HeaderSubtitle>
-            </TitleSubheader>
-          </HeaderLink>
-          <MeWrapper>
-            <Socials>
-              <SocialWrapper href="https://github.com/nolenroyalty/every-uuid">
-                <Code />
-              </SocialWrapper>
-              <SocialWrapper href="https://twitter.com/itseieio">
-                <Twitter />
-              </SocialWrapper>
-              <SocialWrapper href="https://bsky.app/profile/itseieio.bsky.social">
-                <Bsky />
-              </SocialWrapper>
-            </Socials>
-            <p>
-              A website by <Link href="https://eieio.games">eieio</Link>
-            </p>
-          </MeWrapper>
-        </Header>
-
+        <Header />
         <Content>
           <UUIDContainer ref={containerRef} onKeyDown={handleKey} tabIndex={0}>
             <UUIDList>
@@ -798,7 +727,8 @@ function App() {
                 }
                 const uuid = indexToUUID(index);
                 if (!uuid) {
-                  console.log("no uuid", index);
+                  console.error("no uuid", index);
+                  return null;
                 }
                 return (
                   <UUIDItem
