@@ -1,15 +1,9 @@
 import React from "react";
 import styled, { keyframes } from "styled-components";
-import {
-  ChevronUp,
-  ChevronDown,
-  ClipboardCopy,
-  Star,
-  Twitter,
-  Bsky,
-  Code,
-} from "../Icons/Icons";
+import { ClipboardCopy, Star } from "../Icons/Icons";
 import Header from "../Header/Header";
+import Scrollbar from "../Scrollbar/Scrollbar";
+import UnstyledButton from "../UnstyledButton/UnstyledButton";
 import {
   MAX_UUID,
   WIDTH_TO_SHOW_DOUBLE_HEIGHT,
@@ -26,35 +20,6 @@ const Wrapper = styled.div`
   max-height: 100dvh;
   overflow: hidden;
   overscroll-behavior: none;
-`;
-
-const UnstyledButton = styled.button`
-  border: none;
-  background: none;
-  padding: 0;
-  align-items: center;
-  justify-content: center;
-`;
-
-const NavigationArrow = styled(UnstyledButton)`
-  /* width: 100%; */
-  width: ${SCROLLBAR_WIDTH}px;
-  margin: 0 0 0 auto;
-  height: 1.5rem;
-  background-color: var(--slate-200);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  /* border-bottom: 1px solid #e5e7eb; */
-  transition: background-color 0.1s ease-in-out;
-
-  color: var(--slate-500);
-  cursor: pointer;
-  @media (hover: hover) {
-    &:hover {
-      background-color: var(--slate-400);
-    }
-  }
 `;
 
 const CopyButton = styled(UnstyledButton)`
@@ -265,40 +230,6 @@ function UUIDItem({ height, index, uuid, isFaved, toggleFavedUUID }) {
   );
 }
 
-const ScrollbarContainer = styled.div`
-  width: ${SCROLLBAR_WIDTH}px;
-  background-color: var(--slate-200);
-  display: flex;
-  flex-direction: column;
-`;
-
-const ScrollbarTrack = styled.div`
-  height: 100%;
-  margin: 0 0.5rem;
-  cursor: pointer;
-  position: relative;
-`;
-
-const ScrollbarThumb = styled.div`
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: ${(props) => props.$height}px;
-  background-color: var(--slate-400);
-  cursor: grab;
-  transition: background-color 0.1s ease-in-out;
-
-  @media (hover: hover) {
-    &:hover {
-      background-color: var(--slate-500);
-    }
-  }
-
-  &:active {
-    cursor: grabbing;
-  }
-`;
-
 function indexToUUID(index) {
   // Convert index to two 64-bit blocks (left and right)
   let left = BigInt(index) >> BigInt(64);
@@ -413,43 +344,13 @@ function App() {
     };
   }, []);
 
-  const animateToPosition = (targetPos) => {
-    setTargetPosition(targetPos);
-    setIsAnimating(true);
-  };
-
-  const handleDragStart = React.useCallback(
-    (e) => {
-      e.preventDefault();
-      setIsDragging(true);
-      setIsAnimating(false);
+  const animateToPosition = React.useCallback(
+    (targetPos) => {
+      setTargetPosition(targetPos);
+      setIsAnimating(true);
     },
-    [setIsDragging, setIsAnimating]
+    [setTargetPosition, setIsAnimating]
   );
-
-  const handleDrag = React.useCallback(
-    (e) => {
-      if (!isDragging || !scrollbarRef.current) return;
-
-      const rect = scrollbarRef.current.getBoundingClientRect();
-      const trackHeight = rect.height - THUMB_HEIGHT;
-      let percentage = (e.clientY - rect.top - THUMB_HEIGHT / 2) / trackHeight;
-      percentage = Math.max(0, Math.min(1, percentage));
-
-      let pos = BigInt(Math.floor(Number(MAX_POSITION) * percentage));
-      if (pos < 0n) {
-        pos = 0n;
-      } else if (pos > MAX_POSITION) {
-        pos = MAX_POSITION;
-      }
-      setVirtualPosition(pos);
-    },
-    [isDragging, scrollbarRef, MAX_POSITION]
-  );
-
-  const handleDragEnd = React.useCallback(() => {
-    setIsDragging(false);
-  }, [setIsDragging]);
 
   const movePosition = React.useCallback(
     (delta) => {
@@ -553,38 +454,6 @@ function App() {
       animateToPosition,
     ]
   );
-
-  const handleScrollbarClick = (e) => {
-    // Prevent click handling if we're clicking the thumb itself
-    if (e.target === thumbRef.current) return;
-
-    if (!scrollbarRef.current) return;
-
-    const rect = scrollbarRef.current.getBoundingClientRect();
-    const trackHeight = rect.height - THUMB_HEIGHT;
-    let clickPosition = (e.clientY - rect.top - THUMB_HEIGHT / 2) / trackHeight;
-    clickPosition = Math.max(0, Math.min(1, clickPosition));
-
-    const newPosition = BigInt(
-      Math.floor(Number(MAX_POSITION) * clickPosition)
-    );
-    animateToPosition(newPosition);
-  };
-
-  const handleAnchorClick = (position) => {
-    animateToPosition(position);
-  };
-
-  React.useEffect(() => {
-    if (isDragging) {
-      window.addEventListener("mousemove", handleDrag);
-      window.addEventListener("mouseup", handleDragEnd);
-      return () => {
-        window.removeEventListener("mousemove", handleDrag);
-        window.removeEventListener("mouseup", handleDragEnd);
-      };
-    }
-  }, [isDragging, handleDrag, handleDragEnd]);
 
   React.useEffect(() => {
     if (isAnimating && targetPosition !== null) {
@@ -745,27 +614,13 @@ function App() {
           </UUIDContainer>
         </Content>
       </HeaderAndContent>
-      <ScrollbarContainer>
-        <NavigationArrow onClick={() => handleAnchorClick(0n)}>
-          <ChevronUp />
-        </NavigationArrow>
-        <ScrollbarTrack ref={scrollbarRef} onClick={handleScrollbarClick}>
-          <ScrollbarThumb
-            ref={thumbRef}
-            style={{
-              top: `${thumbPosition}%`,
-              height: THUMB_HEIGHT,
-            }}
-            onMouseDown={handleDragStart}
-          />
-        </ScrollbarTrack>
-        <NavigationArrow
-          $bottom
-          onClick={() => handleAnchorClick(MAX_POSITION)}
-        >
-          <ChevronDown />
-        </NavigationArrow>
-      </ScrollbarContainer>
+      <Scrollbar
+        virtualPosition={virtualPosition}
+        MAX_POSITION={MAX_POSITION}
+        animateToPosition={animateToPosition}
+        setVirtualPosition={setVirtualPosition}
+        setIsAnimating={setIsAnimating}
+      />
     </Wrapper>
   );
 }
