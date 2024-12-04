@@ -4,6 +4,7 @@ import Header from "../Header/Header";
 import Scrollbar from "../Scrollbar/Scrollbar";
 import { MAX_UUID } from "../../../lib/constants";
 import UUIDDisplay from "../UUIDDisplay/UUIDDisplay";
+import SearchWidget from "../SearchWidget/SearchWidget";
 
 const Wrapper = styled.div`
   display: flex;
@@ -37,6 +38,8 @@ function App() {
   const [isAnimating, setIsAnimating] = React.useState(false);
   const [targetPosition, setTargetPosition] = React.useState(null);
   const [itemsToShow, setItemsToShow] = React.useState(40);
+  const [search, setSearch] = React.useState("");
+  const [searchDisplayed, setSearchDisplayed] = React.useState(false);
   const animationRef = React.useRef(null);
 
   const [favedUUIDs, setFavedUUIDs] = React.useState(
@@ -109,31 +112,43 @@ function App() {
   }, [isAnimating, targetPosition]);
 
   return (
-    <Wrapper>
-      <HeaderAndContent>
-        <Header />
-        <Content>
-          <UUIDDisplay
-            itemsToShow={itemsToShow}
-            setItemsToShow={setItemsToShow}
-            virtualPosition={virtualPosition}
-            setVirtualPosition={setVirtualPosition}
-            favedUUIDs={favedUUIDs}
-            toggleFavedUUID={toggleFavedUUID}
-            isAnimating={isAnimating}
-            MAX_POSITION={MAX_POSITION}
-            animateToPosition={animateToPosition}
-          />
-        </Content>
-      </HeaderAndContent>
-      <Scrollbar
-        virtualPosition={virtualPosition}
-        MAX_POSITION={MAX_POSITION}
+    <>
+      <SearchWidget
         animateToPosition={animateToPosition}
         setVirtualPosition={setVirtualPosition}
-        setIsAnimating={setIsAnimating}
+        search={search}
+        setSearch={setSearch}
+        searchDisplayed={searchDisplayed}
+        setSearchDisplayed={setSearchDisplayed}
       />
-    </Wrapper>
+      <Wrapper>
+        <HeaderAndContent>
+          <Header />
+          <Content>
+            <UUIDDisplay
+              itemsToShow={itemsToShow}
+              setItemsToShow={setItemsToShow}
+              virtualPosition={virtualPosition}
+              setVirtualPosition={setVirtualPosition}
+              favedUUIDs={favedUUIDs}
+              toggleFavedUUID={toggleFavedUUID}
+              isAnimating={isAnimating}
+              MAX_POSITION={MAX_POSITION}
+              animateToPosition={animateToPosition}
+              search={search}
+              searchDisplayed={searchDisplayed}
+            />
+          </Content>
+        </HeaderAndContent>
+        <Scrollbar
+          virtualPosition={virtualPosition}
+          MAX_POSITION={MAX_POSITION}
+          animateToPosition={animateToPosition}
+          setVirtualPosition={setVirtualPosition}
+          setIsAnimating={setIsAnimating}
+        />
+      </Wrapper>
+    </>
   );
 }
 

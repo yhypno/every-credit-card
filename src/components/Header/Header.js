@@ -5,7 +5,11 @@ import {
   querySmallScreen,
 } from "../../../lib/constants";
 import { Code, Twitter, Bsky, Help } from "../Icons/Icons";
-const SUBHEADS = ["In case you forgot one", "Hand-picked just for you"];
+const SUBHEADS = [
+  "In case you forgot one",
+  "Hand-picked just for you",
+  "Well, only the V4 ones",
+];
 
 const Wrapper = styled.header`
   padding: 1rem 1rem 16px 24px;
@@ -109,6 +113,10 @@ const Socials = styled.div`
   @media (max-width: ${WIDTH_TO_SHOW_DOUBLE_HEIGHT}px) {
     transform: translateY(-1px);
   }
+`;
+
+const V4Small = styled.sup`
+  font-size: 0.75rem;
 `;
 
 function Header() {

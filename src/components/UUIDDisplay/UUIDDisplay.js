@@ -68,9 +68,6 @@ const SpinStretch = keyframes`
     transform: scale(0.8) rotate(-40deg);
   }
 
-  80% {
-    transform: scale(1) rotate(400deg);
-  }
 
   100% {
     transform: scale(1) rotate(360deg);
@@ -86,7 +83,7 @@ const FavoriteButton = styled(BaseButton)`
     props.$isFaved ? "var(--yellow-500)" : "transparent"};
 
   &[data-just-faved="true"] {
-    animation: ${SpinStretch} 1s ease-in-out;
+    animation: ${SpinStretch} 0.8s cubic-bezier(0.25, 0.8, 0.25, 1) both;
   }
 
   @media (hover: hover) {
@@ -254,7 +251,18 @@ const UUID = styled.span`
   }
 `;
 
-function Row({ index, uuid, isFaved, toggleFavedUUID }) {
+const Highlight = styled.span`
+  background-color: yellow;
+`;
+
+function Row({
+  index,
+  uuid,
+  isFaved,
+  toggleFavedUUID,
+  search,
+  searchDisplayed,
+}) {
   const indexString = index.toString();
   const length = indexString.length;
   const padLength = 37;
@@ -307,6 +315,20 @@ function Row({ index, uuid, isFaved, toggleFavedUUID }) {
     };
   }, [mouseDown, handleCopy]);
 
+  const highlight = searchDisplayed && search && uuid.includes(search);
+  let UUIDToDisplay = uuid;
+  if (highlight) {
+    const start = uuid.indexOf(search);
+    const end = start + search.length;
+    UUIDToDisplay = (
+      <>
+        {uuid.slice(0, start)}
+        <Highlight>{uuid.slice(start, end)}</Highlight>
+        {uuid.slice(end)}
+      </>
+    );
+  }
+
   return (
     <RowWrapper
       // this doesn't work well with touch-scrolling (you end up copying on accident)
@@ -326,7 +348,7 @@ function Row({ index, uuid, isFaved, toggleFavedUUID }) {
         <Index>{indexString}</Index>
       </IndexWithPadding>
       <Colon />
-      <UUID>{uuid}</UUID>
+      <UUID>{UUIDToDisplay}</UUID>
       <CopyButton onClick={handleCopy} $rowMouseDown={mouseDown}>
         <ClipboardCopy style={{ height: "100%", aspectRatio: 1 }} />
       </CopyButton>
@@ -360,6 +382,8 @@ function UUIDDisplay({
   isAnimating,
   MAX_POSITION,
   animateToPosition,
+  search,
+  searchDisplayed,
 }) {
   const ref = React.useRef(null);
 
@@ -591,6 +615,8 @@ function UUIDDisplay({
               uuid={uuid}
               isFaved={favedUUIDs[uuid]}
               toggleFavedUUID={toggleFavedUUID}
+              search={search}
+              searchDisplayed={searchDisplayed}
             />
           );
         })}
