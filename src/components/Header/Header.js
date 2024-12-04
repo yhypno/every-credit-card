@@ -7,7 +7,7 @@ import {
 import { Code, Twitter, Bsky, Help } from "../Icons/Icons";
 const SUBHEADS = [
   "In case you forgot one",
-  "Hand-picked just for you",
+  "Scroll till you find a good one",
   "Well, only the V4 ones",
 ];
 
