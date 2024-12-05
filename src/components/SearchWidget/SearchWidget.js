@@ -132,6 +132,8 @@ function SearchWidget({
   setSearch,
   searchDisplayed,
   setSearchDisplayed,
+  displayedUUIDs,
+  virtualPosition,
 }) {
   const inputRef = React.useRef(null);
   const cmdKey = React.useMemo(() => {
@@ -140,7 +142,10 @@ function SearchWidget({
   }, []);
   const shiftIsHeldDown = useShiftIsHeldDown();
 
-  const { searchUUID, currentUUID, nextUUID, previousUUID } = useUUIDSearch();
+  const { searchUUID, currentUUID, nextUUID, previousUUID } = useUUIDSearch({
+    displayedUUIDs,
+    virtualPosition,
+  });
   const index = React.useMemo(() => {
     if (currentUUID) {
       const index = uuidToIndex(currentUUID);
@@ -197,12 +202,9 @@ function SearchWidget({
         <Form
           onSubmit={(e) => {
             e.preventDefault();
-            console.log(shiftIsHeldDown);
             if (shiftIsHeldDown) {
-              console.log("previous");
               previousUUID();
             } else {
-              console.log("next");
               nextUUID();
             }
           }}

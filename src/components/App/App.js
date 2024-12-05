@@ -5,6 +5,7 @@ import Scrollbar from "../Scrollbar/Scrollbar";
 import { MAX_UUID } from "../../../lib/constants";
 import UUIDDisplay from "../UUIDDisplay/UUIDDisplay";
 import SearchWidget from "../SearchWidget/SearchWidget";
+import { indexToUUID } from "../../../lib/uuidTools";
 
 const Wrapper = styled.div`
   display: flex;
@@ -115,15 +116,35 @@ function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAnimating, targetPosition]);
 
+  const displayedUUIDs = React.useMemo(() => {
+    return Array.from({ length: itemsToShow }, (_, i) => {
+      const index = virtualPosition + BigInt(i);
+      if (index < 0n) {
+        return null;
+      }
+      if (index > MAX_UUID) {
+        return null;
+      }
+      const uuid = indexToUUID(index);
+      if (!uuid) {
+        console.error("no uuid", index);
+        return null;
+      }
+      return { index, uuid };
+    });
+  }, [virtualPosition, itemsToShow]);
+
   return (
     <>
       <SearchWidget
         animateToPosition={animateToPosition}
+        virtualPosition={virtualPosition}
         setVirtualPosition={setVirtualPosition}
         search={search}
         setSearch={setSearch}
         searchDisplayed={searchDisplayed}
         setSearchDisplayed={setSearchDisplayed}
+        displayedUUIDs={displayedUUIDs}
       />
       <Wrapper>
         <HeaderAndContent>
@@ -141,6 +162,7 @@ function App() {
               animateToPosition={animateToPosition}
               search={search}
               searchDisplayed={searchDisplayed}
+              displayedUUIDs={displayedUUIDs}
             />
           </Content>
         </HeaderAndContent>

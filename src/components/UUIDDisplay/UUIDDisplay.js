@@ -384,6 +384,7 @@ function UUIDDisplay({
   animateToPosition,
   search,
   searchDisplayed,
+  displayedUUIDs,
 }) {
   const ref = React.useRef(null);
 
@@ -598,19 +599,7 @@ function UUIDDisplay({
   return (
     <Wrapper ref={ref} onKeyDown={handleKeyDown} tabIndex={0}>
       <List>
-        {Array.from({ length: itemsToShow }, (_, i) => {
-          const index = virtualPosition + BigInt(i);
-          if (index < 0n) {
-            return null;
-          }
-          if (index > MAX_UUID) {
-            return null;
-          }
-          const uuid = indexToUUID(index);
-          if (!uuid) {
-            console.error("no uuid", index);
-            return null;
-          }
+        {displayedUUIDs.map(({ index, uuid }, i) => {
           return (
             <Row
               key={i}
