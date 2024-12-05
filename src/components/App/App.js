@@ -79,7 +79,10 @@ function App() {
       const startTime = performance.now();
       const duration = 300;
 
-      const animate = (currentTime) => {
+      const animate = () => {
+        // we can't use the currentTime provided by animate because it's not guaranteed
+        // to be after startTime!
+        const currentTime = performance.now();
         const elapsed = currentTime - startTime;
         const progress = Math.min(elapsed / duration, 1);
         const easeProgress = 1 - Math.pow(1 - progress, 4);
@@ -88,6 +91,7 @@ function App() {
           ((targetPosition - startPosition) *
             BigInt(Math.floor(easeProgress * 1000))) /
             1000n;
+
         setVirtualPosition(currentPos);
 
         if (progress < 1) {

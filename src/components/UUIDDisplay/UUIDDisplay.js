@@ -1,7 +1,7 @@
 import React from "react";
 import styled, { keyframes } from "styled-components";
 import UnstyledButton from "../UnstyledButton/UnstyledButton";
-import { indexToUUID } from "../../../lib/uuidTools";
+import { indexToUUID, intToUUID } from "../../../lib/uuidTools";
 import {
   querySmallScreen,
   queryVerySmallScreen,
@@ -600,6 +600,9 @@ function UUIDDisplay({
       <List>
         {Array.from({ length: itemsToShow }, (_, i) => {
           const index = virtualPosition + BigInt(i);
+          if (index < 0n) {
+            return null;
+          }
           if (index > MAX_UUID) {
             return null;
           }

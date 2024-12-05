@@ -4,6 +4,7 @@ import UnstyledButton from "../UnstyledButton/UnstyledButton";
 import { X, ChevronUp, ChevronDown } from "../Icons/Icons";
 import { uuidToIndex } from "../../../lib/uuidTools";
 import { useUUIDSearch } from "../../../hooks/use-uuid-search";
+import { querySmallScreen, SCROLLBAR_WIDTH } from "../../../lib/constants";
 
 const Button = styled(UnstyledButton)`
   font-size: 0.875rem;
@@ -11,6 +12,7 @@ const Button = styled(UnstyledButton)`
   max-height: 80%;
   padding: 4px;
   color: var(--neutral-700);
+  flex-shrink: 0;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -33,6 +35,13 @@ const Wrapper = styled.div`
   right: 4rem;
   padding: 0 0.5rem;
 
+  /* max-width: max-content; */
+  max-width: calc(100vw - ${SCROLLBAR_WIDTH}px);
+
+  @media ${querySmallScreen} {
+    right: calc(${SCROLLBAR_WIDTH}px);
+  }
+
   transform: translateY(var(--y-offset));
   transition: transform 0.2s cubic-bezier(0.215, 0.61, 0.355, 1);
   z-index: 1000;
@@ -40,10 +49,45 @@ const Wrapper = styled.div`
   align-items: center;
 `;
 
+const ShowSearchButton = styled(UnstyledButton)`
+  background-color: var(--slate-50);
+  border-radius: 0 0 8px 8px;
+  font-size: 0.875rem;
+  font-family: monospace;
+  padding: 0rem 1rem;
+
+  /* transform: translateY(var(--y-offset));
+  transition: transform 0.1s cubic-bezier(0.215, 0.61, 0.355, 1); */
+  display: flex;
+  align-items: center;
+
+  position: absolute;
+  z-index: 999;
+  right: 10rem;
+  color: inherit;
+  @media ${querySmallScreen} {
+    right: calc(${SCROLLBAR_WIDTH}px);
+    bottom: 0;
+    border-radius: 8px 0 0 8px;
+  }
+
+  outline: none;
+  &:focus {
+    outline: none;
+  }
+  cursor: pointer;
+  transition: background-color 0.1s ease-in-out;
+  @media (hover: hover) {
+    &:hover {
+      background-color: var(--slate-400);
+    }
+  }
+`;
+
 const Input = styled.input`
   font-family: monospace;
   font-size: 1rem;
-  width: 38ch;
+  width: 100%;
   padding: 0.25rem;
   outline: none;
   border: none;
@@ -54,11 +98,18 @@ const Input = styled.input`
   }
 `;
 
+const Form = styled.form`
+  flex: 1 1 38ch;
+  width: 38ch;
+  min-width: 6ch;
+`;
+
 const Line = styled.div`
   height: 60%;
   width: 1px;
   background-color: var(--neutral-400);
   margin-right: 0.5rem;
+  flex-shrink: 0;
 `;
 
 function useShiftIsHeldDown() {
@@ -94,7 +145,6 @@ function SearchWidget({
     if (currentUUID) {
       const index = uuidToIndex(currentUUID);
 
-      console.log(`UUID: ${currentUUID} -> Index: ${index}`);
       return index;
     }
     return null;
@@ -132,42 +182,54 @@ function SearchWidget({
   }, [searchDisplayed, cmdKey]);
 
   return (
-    <Wrapper style={{ "--y-offset": searchDisplayed ? "0" : "-110%" }}>
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          console.log(shiftIsHeldDown);
-          if (shiftIsHeldDown) {
-            console.log("previous");
-            previousUUID();
-          } else {
-            console.log("next");
-            nextUUID();
+    <>
+      <ShowSearchButton
+        onClick={() => {
+          if (!searchDisplayed && inputRef.current) {
+            inputRef.current.focus();
           }
+          setSearchDisplayed((prev) => !prev);
         }}
       >
-        <Input
-          ref={inputRef}
-          type="text"
-          placeholder="Search for a UUID"
-          value={search}
-          onChange={(e) => {
-            setSearch(e.target.value);
-            searchUUID(e.target.value);
+        search!
+      </ShowSearchButton>
+      <Wrapper style={{ "--y-offset": searchDisplayed ? "0" : "-110%" }}>
+        <Form
+          onSubmit={(e) => {
+            e.preventDefault();
+            console.log(shiftIsHeldDown);
+            if (shiftIsHeldDown) {
+              console.log("previous");
+              previousUUID();
+            } else {
+              console.log("next");
+              nextUUID();
+            }
           }}
-        />
-      </form>
-      <Line />
-      <Button onClick={() => previousUUID()}>
-        <ChevronUp style={{ height: "100%", width: "100%" }} />
-      </Button>
-      <Button onClick={() => nextUUID()}>
-        <ChevronDown style={{ height: "100%", width: "100%" }} />
-      </Button>
-      <Button onClick={() => setSearch("")}>
-        <X style={{ height: "100%", width: "100%" }} />
-      </Button>
-    </Wrapper>
+        >
+          <Input
+            ref={inputRef}
+            type="text"
+            placeholder="Search for a UUID"
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              searchUUID(e.target.value);
+            }}
+          />
+        </Form>
+        <Line />
+        <Button onClick={() => previousUUID()}>
+          <ChevronUp style={{ height: "100%", width: "100%" }} />
+        </Button>
+        <Button onClick={() => nextUUID()}>
+          <ChevronDown style={{ height: "100%", width: "100%" }} />
+        </Button>
+        <Button onClick={() => setSearchDisplayed(false)}>
+          <X style={{ height: "100%", width: "100%" }} />
+        </Button>
+      </Wrapper>
+    </>
   );
 }
 
