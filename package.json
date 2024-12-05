@@ -6,12 +6,12 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "predev": "rimraf .parcel-cache dist",
     "dev": "parcel public/index.html",
-    "prebuild": "rmraf .parcel-cache dist",
+    "prebuild": "rimraf .parcel-cache dist",
     "build": "parcel build public/index.html",
     "new-component": "new-component"
   },
   "keywords": [],
-  "author": "",
+  "author": "nolen (eieio)",
   "license": "ISC",
   "dependencies": {
     "eslint": "^8.57.1",
@@ -26,5 +26,6 @@
     "react-feather": "^2.0.10",
     "rimraf": "^6.0.1",
     "styled-components": "^6.1.13"
-  }
+  },
+  "browserslist": ">0.3%, defaults, supports es6-module"
 }
