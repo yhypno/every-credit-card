@@ -222,8 +222,8 @@ function SearchWidget({
             placeholder="Search for a UUID"
             value={search}
             onChange={(e) => {
-              setSearch(e.target.value);
-              searchUUID(e.target.value);
+              setSearch(e.target.value.toLowerCase());
+              searchUUID(e.target.value.toLowerCase());
             }}
           />
         </Form>
