@@ -5,6 +5,7 @@ import Scrollbar from "../Scrollbar/Scrollbar";
 import { MAX_UUID } from "../../../lib/constants";
 import UUIDDisplay from "../UUIDDisplay/UUIDDisplay";
 import SearchWidget from "../SearchWidget/SearchWidget";
+import FavoritesWidget from "../FavoritesWidget";
 import { indexToUUID } from "../../../lib/uuidTools";
 
 const Wrapper = styled.div`
@@ -41,6 +42,7 @@ function App() {
   const [itemsToShow, setItemsToShow] = React.useState(40);
   const [search, setSearch] = React.useState("");
   const [searchDisplayed, setSearchDisplayed] = React.useState(false);
+  const [showFavorites, setShowFavorites] = React.useState(false);
   const animationRef = React.useRef(null);
 
   const [favedUUIDs, setFavedUUIDs] = React.useState(
@@ -117,6 +119,12 @@ function App() {
   }, [isAnimating, targetPosition]);
 
   const displayedUUIDs = React.useMemo(() => {
+    if (showFavorites) {
+      return Object.keys(favedUUIDs).map((uuid, i) => ({
+        index: BigInt(i),
+        uuid,
+      }));
+    }
     return Array.from({ length: itemsToShow }, (_, i) => {
       const index = virtualPosition + BigInt(i);
       if (index < 0n) {
@@ -132,7 +140,7 @@ function App() {
       }
       return { index, uuid };
     });
-  }, [virtualPosition, itemsToShow]);
+  }, [virtualPosition, itemsToShow, showFavorites, favedUUIDs]);
 
   return (
     <>
@@ -146,6 +154,10 @@ function App() {
         setSearchDisplayed={setSearchDisplayed}
         displayedUUIDs={displayedUUIDs}
         MAX_POSITION={MAX_POSITION}
+      />
+      <FavoritesWidget
+        setShowFavorites={setShowFavorites}
+        isShowingFavorites={showFavorites}
       />
       <Wrapper>
         <HeaderAndContent>
