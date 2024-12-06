@@ -393,7 +393,9 @@ function UUIDDisplay({
       if (isAnimating) return;
       setVirtualPosition((prev) => {
         const newPos = prev + delta;
-        return newPos < 0n ? 0n : newPos > MAX_POSITION ? MAX_POSITION : newPos;
+        const ret =
+          newPos < 0n ? 0n : newPos > MAX_POSITION ? MAX_POSITION : newPos;
+        return ret;
       });
     },
     [isAnimating, MAX_POSITION, setVirtualPosition]
@@ -502,7 +504,7 @@ function UUIDDisplay({
       ref.current.removeEventListener("touchmove", handleTouchMove);
       ref.current.removeEventListener("touchend", handleTouchEnd);
     };
-  }, []);
+  }, [movePosition]);
 
   const handleKeyDown = React.useCallback(
     (e) => {

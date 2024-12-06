@@ -145,6 +145,7 @@ function App() {
         searchDisplayed={searchDisplayed}
         setSearchDisplayed={setSearchDisplayed}
         displayedUUIDs={displayedUUIDs}
+        MAX_POSITION={MAX_POSITION}
       />
       <Wrapper>
         <HeaderAndContent>

@@ -134,6 +134,7 @@ function SearchWidget({
   setSearchDisplayed,
   displayedUUIDs,
   virtualPosition,
+  MAX_POSITION,
 }) {
   const inputRef = React.useRef(null);
   const cmdKey = React.useMemo(() => {
@@ -157,7 +158,13 @@ function SearchWidget({
 
   React.useEffect(() => {
     if (index) {
-      setVirtualPosition(index);
+      if (index < 0n) {
+        setVirtualPosition(0n);
+      } else if (index >= MAX_POSITION) {
+        setVirtualPosition(MAX_POSITION);
+      } else {
+        setVirtualPosition(index);
+      }
     }
   }, [setVirtualPosition, index]);
 
