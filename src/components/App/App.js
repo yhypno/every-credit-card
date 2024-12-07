@@ -6,7 +6,7 @@ import { MAX_UUID } from "../../../lib/constants";
 import UUIDDisplay from "../UUIDDisplay/UUIDDisplay";
 import SearchWidget from "../SearchWidget/SearchWidget";
 import FavoritesWidget from "../FavoritesWidget";
-import { indexToUUID } from "../../../lib/uuidTools";
+import { indexToUUID, uuidToIndex } from "../../../lib/uuidTools";
 
 const Wrapper = styled.div`
   display: flex;
@@ -121,7 +121,7 @@ function App() {
   const displayedUUIDs = React.useMemo(() => {
     if (showFavorites) {
       return Object.keys(favedUUIDs).map((uuid, i) => ({
-        index: BigInt(i),
+        index: uuidToIndex(uuid),
         uuid,
       }));
     }
