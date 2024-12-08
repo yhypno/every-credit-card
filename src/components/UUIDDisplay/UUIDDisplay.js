@@ -584,9 +584,9 @@ function UUIDDisplay({
           return;
         case handleKeyAndPrevent("ArrowUp", [], () => movePosition(-1n)):
           return;
-        case handleKeyAndPrevent("KeyJ", [], () => movePosition(1n)):
+        case handleKeyAndPrevent("j", [], () => movePosition(1n)):
           return;
-        case handleKeyAndPrevent("KeyK", [], () => movePosition(-1n)):
+        case handleKeyAndPrevent("k", [], () => movePosition(-1n)):
           return;
         default:
           break;
