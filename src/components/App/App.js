@@ -42,7 +42,7 @@ function App() {
   const [itemsToShow, setItemsToShow] = React.useState(40);
   const [search, setSearch] = React.useState("");
   const [searchDisplayed, setSearchDisplayed] = React.useState(false);
-  const [showFavorites, setShowFavorites] = React.useState(false);
+  const [showFavorites, _setShowFavorites] = React.useState(false);
   const animationRef = React.useRef(null);
 
   const [favedUUIDs, setFavedUUIDs] = React.useState(
@@ -50,7 +50,25 @@ function App() {
       ? JSON.parse(localStorage.getItem("favedUUIDs"))
       : {}
   );
-  const MAX_POSITION = MAX_UUID - BigInt(itemsToShow);
+
+  const setShowFavorites = React.useCallback(
+    (value) => {
+      setVirtualPosition(0n);
+      _setShowFavorites(value);
+    },
+    [_setShowFavorites]
+  );
+
+  const MAX_POSITION = React.useMemo(() => {
+    if (showFavorites) {
+      const itemsToShowBig = BigInt(itemsToShow);
+      const favedUUIDsLength = BigInt(Object.keys(favedUUIDs).length);
+      if (favedUUIDsLength > itemsToShowBig) {
+        return favedUUIDsLength - itemsToShowBig;
+      }
+      return 0n;
+    } else return MAX_UUID - BigInt(itemsToShow);
+  }, [itemsToShow, showFavorites, favedUUIDs]);
 
   const toggleFavedUUID = (uuid) => {
     setFavedUUIDs((prev) => {
@@ -120,10 +138,31 @@ function App() {
 
   const displayedUUIDs = React.useMemo(() => {
     if (showFavorites) {
-      return Object.keys(favedUUIDs).map((uuid, i) => ({
-        index: uuidToIndex(uuid),
-        uuid,
-      }));
+      const allUUIDs = Object.keys(favedUUIDs)
+        .map((uuid) => {
+          const index = uuidToIndex(uuid);
+          if (index === null) {
+            console.error("no index", uuid);
+            return null;
+          }
+          return {
+            index,
+            uuid,
+          };
+        })
+        .filter((item) => item !== null)
+        .sort((a, b) => {
+          const delta = a.index - b.index;
+          if (delta < 0n) return -1;
+          if (delta > 0n) return 1;
+          return 0;
+        });
+      let startIndex = virtualPosition;
+      let endIndex = startIndex + BigInt(itemsToShow);
+      if (startIndex > MAX_POSITION) {
+        startIndex = MAX_POSITION;
+      }
+      return allUUIDs.slice(Number(startIndex), Number(endIndex));
     }
     return Array.from({ length: itemsToShow }, (_, i) => {
       const index = virtualPosition + BigInt(i);
@@ -140,7 +179,7 @@ function App() {
       }
       return { index, uuid };
     });
-  }, [virtualPosition, itemsToShow, showFavorites, favedUUIDs]);
+  }, [virtualPosition, itemsToShow, showFavorites, favedUUIDs, MAX_POSITION]);
 
   return (
     <>
