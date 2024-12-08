@@ -104,7 +104,7 @@ function Scrollbar({
   const scrollPercentage = Number((virtualPosition * 100n) / MAX_POSITION);
   const thumbPosition = Math.min(
     100 - (THUMB_HEIGHT * 100) / (trackRef.current?.clientHeight || 100),
-    Math.max(0, scrollPercentage)
+    Math.max(0, scrollPercentage),
   );
 
   const handleTrackClick = (e) => {
@@ -133,7 +133,7 @@ function Scrollbar({
       const newPosition = percentOfMax(percentage, MAX_POSITION);
       setVirtualPosition(newPosition);
     },
-    [isDragging, trackRef, MAX_POSITION, setVirtualPosition]
+    [isDragging, trackRef, MAX_POSITION, setVirtualPosition],
   );
 
   const handleDragStart = React.useCallback(
@@ -142,7 +142,7 @@ function Scrollbar({
       setIsDragging(true);
       setIsAnimating(false);
     },
-    [setIsDragging, setIsAnimating]
+    [setIsDragging, setIsAnimating],
   );
 
   const handleDragEnd = React.useCallback(() => {
@@ -151,11 +151,11 @@ function Scrollbar({
 
   React.useEffect(() => {
     if (isDragging) {
-      window.addEventListener("mousemove", handleDrag);
-      window.addEventListener("mouseup", handleDragEnd);
+      window.addEventListener("pointermove", handleDrag);
+      window.addEventListener("pointerup", handleDragEnd);
       return () => {
-        window.removeEventListener("mousemove", handleDrag);
-        window.removeEventListener("mouseup", handleDragEnd);
+        window.removeEventListener("pointermove", handleDrag);
+        window.removeEventListener("pointerup", handleDragEnd);
       };
     }
   }, [isDragging, handleDrag, handleDragEnd]);
@@ -173,7 +173,7 @@ function Scrollbar({
         <Thumb
           ref={thumbRef}
           style={{ "--position": `${thumbPosition}%` }}
-          onMouseDown={handleDragStart}
+          onPointerDown={handleDragStart}
         />
       </Track>
       <NavigationArrow
