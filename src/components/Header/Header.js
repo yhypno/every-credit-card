@@ -4,11 +4,12 @@ import {
   WIDTH_TO_SHOW_DOUBLE_HEIGHT,
   querySmallScreen,
 } from "../../../lib/constants";
-import { Code, Twitter, Bsky, Help } from "../Icons/Icons";
+import { Code, Twitter, Help } from "../Icons/Icons";
 const SUBHEADS = [
   "In case you forgot one",
   "Scroll till you find a good one",
-  "Well, only the V4 ones",
+  "Find A new one",
+  "Visas, Mastercard or Even Airlines.",
 ];
 
 const Wrapper = styled.header`
@@ -128,27 +129,24 @@ function Header() {
     <Wrapper>
       <TitleSubhead>
         <TitleLink href="/">
-          <Title>Every UUID Dot Com</Title>
+          <Title>Every Credit Card</Title>
         </TitleLink>
         <Subhead>{subhead}</Subhead>
       </TitleSubhead>
       <SelfPromotion>
         <Socials>
-          <SocialLink href="https://eieio.games/blog/writing-down-every-uuid">
+          <SocialLink href="https://github.com/yhypno/every-credit-card">
             <Help />
           </SocialLink>
-          <SocialLink href="https://github.com/nolenroyalty/every-uuid">
+          <SocialLink href="https://github.com/yhypno/every-credit-card">
             <Code />
           </SocialLink>
-          <SocialLink href="https://twitter.com/itseieio">
+          <SocialLink href="https://x.com/yashypn0">
             <Twitter />
-          </SocialLink>
-          <SocialLink href="https://bsky.app/profile/itseieio.bsky.social">
-            <Bsky />
           </SocialLink>
         </Socials>
         <p>
-          A website by <Link href="https://eieio.games">eieio</Link>
+          Forked by <Link href="https://x.com/yashypn0">yashypn0</Link> website by <Link href="https://eieio.games">eieio</Link>
         </p>
       </SelfPromotion>
     </Wrapper>
