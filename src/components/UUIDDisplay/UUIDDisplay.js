@@ -11,7 +11,7 @@ import {
   WIDTH_TO_SHOW_DOUBLE_HEIGHT,
 } from "../../../lib/constants";
 import { ClipboardCopy, Star } from "../Icons";
-
+import { getCardCategory } from "../../../lib/cardCategories";
 const BaseButton = styled(UnstyledButton)`
   height: 100%;
   aspect-ratio: 1;
@@ -116,9 +116,9 @@ const RowWrapper = styled.div`
   display: grid;
   padding: 0.25rem 0;
 
-  grid-template-areas: "index colon uuid copy favorite copied";
+  grid-template-areas: "index colon uuid category copy favorite copied";
   grid-template-rows: 100%;
-  grid-template-columns: repeat(5, fit-content(15px));
+  grid-template-columns: repeat(7, fit-content(15px));
   gap: 0.25rem 0.5rem;
   align-items: center;
 
@@ -139,8 +139,8 @@ const RowWrapper = styled.div`
   transition: background-color 0.1s ease-in-out;
 
   @media ${querySmallScreen} {
-    grid-template-columns: repeat(2, fit-content(0));
-    grid-template-areas: "index copy favorite" "uuid copy favorite";
+    grid-template-columns: repeat(4, fit-content(0));
+    grid-template-areas: "index copy favorite category" "uuid copy favorite category";
     grid-template-rows: 50% 50%;
     height: ${ITEM_HEIGHT * 2}px;
     justify-content: center;
@@ -255,6 +255,14 @@ const Highlight = styled.span`
   background-color: yellow;
 `;
 
+const Category = styled.span`
+  grid-area: category;
+  color: var(--slate-600);
+  font-size: 0.75em;
+  white-space: nowrap;
+  margin-right: 1rem;
+`;
+
 function Row({
   index,
   uuid,
@@ -265,7 +273,7 @@ function Row({
 }) {
   const indexString = index.toString();
   const length = indexString.length;
-  const padLength = 37;
+  const padLength = 16;
   const paddingLength = padLength - length;
   let padding;
   if (paddingLength < 0) {
@@ -278,6 +286,12 @@ function Row({
   const [mouseDown, setMouseDown] = React.useState(false);
   const [justCopied, setJustCopied] = React.useState(0);
   const timeoutRef = React.useRef(null);
+
+  // umm
+
+  const firstBlock = uuid.split('-')[0];
+  const coup = firstBlock[0] === '0' ? 0 : parseInt(firstBlock.substring(0, 2));
+  const category = getCardCategory(coup);
 
   const handleCopy = React.useCallback(async () => {
     clearTimeout(timeoutRef.current);
@@ -347,8 +361,9 @@ function Row({
         <Padding>{padding}</Padding>
         <Index>{indexString}</Index>
       </IndexWithPadding>
-      <Colon />
-      <UUID>{UUIDToDisplay}</UUID>
+      <Colon style={{marginRight: "2rem"}}/>
+      <UUID style={{marginRight: "2rem"}}>{UUIDToDisplay}</UUID>
+      <Category style={{width: "300px"}}>{category}</Category>
       <CopyButton onClick={handleCopy} $rowMouseDown={mouseDown}>
         <ClipboardCopy style={{ height: "100%", aspectRatio: 1 }} />
       </CopyButton>
@@ -605,12 +620,13 @@ function UUIDDisplay({
   return (
     <Wrapper ref={ref} onKeyDown={handleKeyDown} tabIndex={0}>
       <List>
-        {displayedUUIDs.map(({ index, uuid }, i) => {
+        {displayedUUIDs.map(({ index, uuid, category}, i) => {
           return (
             <Row
               key={i}
               index={index}
               uuid={uuid}
+              category={category}
               isFaved={favedUUIDs[uuid]}
               toggleFavedUUID={toggleFavedUUID}
               search={search}
