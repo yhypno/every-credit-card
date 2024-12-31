@@ -5,7 +5,7 @@
   "description": "in case I forget one",
   "scripts": {
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d build",
+    "deploy": "gh-pages -d dist",
     "test": "echo \"Error: no test specified\" && exit 1",
     "predev": "rimraf .parcel-cache dist",
     "dev": "parcel public/index.html",
